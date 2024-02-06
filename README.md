@@ -1,4 +1,4 @@
-# Elevational_hologenomics
+# Elevational hologenomics
 
 Data and code repository of the population-level metagenomic data of lizards across elevational gradients in various mountain ranges of the Pyrenees. The project aims to understand the role of gut microbes in hte adaptation to different climatic regions using a hologenomic approach.
 
