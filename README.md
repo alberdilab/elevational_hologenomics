@@ -9,7 +9,7 @@ Four different mountain transects, two on the Spanish side and two on the French
 
 ## 2. Bioinformatic procedures
 
-Data processing to generate annotated metagenome-assembled genomes and genome count tables was conducted using the following Snakemake pipeline: [EHI_bioinformatics] (https://github.com/earthhologenome/EHI_bioinformatics/tree/mjolnir). Data analysis procedures source from the outputs of this pipeline.
+Data processing to generate annotated metagenome-assembled genomes and genome count tables was conducted using the following Snakemake pipeline: [EHI_bioinformatics](https://github.com/earthhologenome/EHI_bioinformatics/tree/mjolnir). Data analysis procedures source from the outputs of this pipeline.
 
 
 ## 3. Data analysis
