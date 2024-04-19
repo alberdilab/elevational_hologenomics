@@ -1,0 +1,345 @@
+---
+title: "04_community_composition"
+author: "Garazi Martin Bideguren"
+date: "2024-04-09"
+output: html_document
+---
+
+# Community composition
+
+```{r load_data_community}
+load("data/data.Rdata")
+```
+
+## Taxonomy overview 
+
+### Stacked barplot
+
+```{r taxonomy_barplot, fig.height=8, fig.width=10, fig.fullwidth=TRUE}
+genome_counts_filt_met<-genome_counts_filt %>%
+  mutate_at(vars(-genome),~./sum(.)) %>% #apply TSS nornalisation
+  pivot_longer(-genome, names_to = "sample", values_to = "count") %>% #reduce to minimum number of columns
+  left_join(., genome_metadata, by = join_by(genome == genome)) %>% #append genome metadata
+  left_join(., sample_metadata, by = join_by(sample == EHI_number)) %>% #append sample metadata
+  filter(count > 0) #filter 0 counts
+
+genome_counts_filt_met$Elevation<-as.factor(genome_counts_filt_met$Elevation)
+# Create an interaction variable for elevation and sample
+genome_counts_filt_met$interaction_var <- interaction(genome_counts_filt_met$sample, genome_counts_filt_met$Elevation)
+
+# Plot stacked barplot
+ggplot(genome_counts_filt_met, aes(x=interaction_var,y=count,fill=phylum, group=phylum))+ #grouping enables keeping the same sorting of taxonomic units
+    geom_bar(stat="identity", colour="white", linewidth=0.1)+ #plot stacked bars with white borders
+    scale_fill_manual(values=phylum_colors) +
+    labs(y = "Relative abundance", x="Elevation (m)") +
+    guides(fill = guide_legend(ncol = 3)) +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+          panel.background = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.line = element_line(linewidth = 0.5, linetype = "solid", colour = "black"),
+          legend.position = "top",
+    legend.title = element_blank(),
+    legend.text = element_text(size=7))+
+    scale_x_discrete(labels = function(x) gsub(".*\\.", "", x)) +
+    facet_wrap(~Transect, scales = "free", labeller = as_labeller(function(label) gsub(".*\\.", "", label))) #only show elevation label
+```
+
+### Phylum relative abundances
+```{r taxonomy_phylum_summary, warning=FALSE, comments="", message=FALSE}
+phylum_summary <- genome_counts_filt %>%
+  mutate_at(vars(-genome),~./sum(.)) %>% #apply TSS nornalisation
+  pivot_longer(-genome, names_to = "sample", values_to = "count") %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  left_join(genome_metadata, by = join_by(genome == genome)) %>%
+  group_by(sample,phylum) %>%
+  summarise(relabun=sum(count))
+
+phylum_summary %>%
+    group_by(phylum) %>%
+    summarise(mean=mean(relabun),sd=sd(relabun)) %>%
+    arrange(-mean) %>%
+    tt()
+```
+
+```{r taxonomy_boxplot_phylum, warning=FALSE, comments="", message=FALSE, fig.height=8, fig.width=10, fig.fullwidth=TRUE}
+phylum_arrange <- phylum_summary %>%
+    group_by(phylum) %>%
+    summarise(mean=mean(relabun)) %>%
+    arrange(-mean) %>%
+    select(phylum) %>%
+    pull()
+
+phylum_summary %>%
+    filter(phylum %in% phylum_arrange) %>%
+    mutate(phylum=factor(phylum,levels=rev(phylum_arrange))) %>%
+    ggplot(aes(x=relabun, y=phylum, group=phylum, color=phylum)) +
+        scale_color_manual(values=phylum_colors[rev(phylum_arrange)]) +
+        geom_jitter(alpha=0.5) + 
+        theme_minimal()
+```
+
+## Taxonomy boxplot
+
+### Family
+```{r taxonomy_family_summary, warning=FALSE, comments="", message=FALSE}
+family_summary <- genome_counts_filt %>%
+  mutate_at(vars(-genome),~./sum(.)) %>% #apply TSS nornalisation
+  pivot_longer(-genome, names_to = "sample", values_to = "count") %>% #reduce to minimum number of columns
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>% #append sample metadata
+  left_join(., genome_metadata, by = join_by(genome == genome)) %>% #append genome metadata
+  group_by(sample,family) %>%
+  summarise(relabun=sum(count))
+
+family_summary %>%
+    group_by(family) %>%
+    summarise(mean=mean(relabun),sd=sd(relabun)) %>%
+    arrange(-mean) %>%
+    tt()
+```
+
+
+### Genus
+```{r taxonomy_genus_summary, warning=FALSE, comments="", message=FALSE}
+genus_summary <- genome_counts_filt %>%
+  mutate_at(vars(-genome),~./sum(.)) %>% #apply TSS nornalisation
+  pivot_longer(-genome, names_to = "sample", values_to = "count") %>% #reduce to minimum number of columns
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>% #append sample metadata
+  left_join(genome_metadata, by = join_by(genome == genome)) %>% #append genome metadata
+  group_by(sample,genus) %>%
+  summarise(relabun=sum(count)) %>%
+  filter(genus != "g__")
+
+genus_summary %>%
+    group_by(genus) %>%
+    summarise(mean=mean(relabun),sd=sd(relabun)) %>%
+    arrange(-mean) %>%
+    tt()
+```
+
+## Alpha diversity
+
+```{r alpha_div, comment="", message=FALSE, warning=FALSE}
+# Calculate Hill numbers
+richness <- genome_counts_filt %>%
+  column_to_rownames(var = "genome") %>%
+  dplyr::select(where(~ !all(. == 0))) %>%
+  hilldiv(., q = 0) %>%
+  t() %>%
+  as.data.frame() %>%
+  dplyr::rename(richness = 1) %>%
+  rownames_to_column(var = "sample")
+
+neutral <- genome_counts_filt %>%
+  column_to_rownames(var = "genome") %>%
+  dplyr::select(where(~ !all(. == 0))) %>%
+  hilldiv(., q = 1) %>%
+  t() %>%
+  as.data.frame() %>%
+  dplyr::rename(neutral = 1) %>%
+  rownames_to_column(var = "sample")
+
+phylogenetic <- genome_counts_filt %>%
+  column_to_rownames(var = "genome") %>%
+  dplyr::select(where(~ !all(. == 0))) %>%
+  hilldiv(., q = 1, tree = genome_tree) %>%
+  t() %>%
+  as.data.frame() %>%
+  dplyr::rename(phylogenetic = 1) %>%
+  rownames_to_column(var = "sample")
+
+# Aggregate basal GIFT into elements (error in this section)
+#Get list of present MAGs
+present_MAGs <- genome_counts_filt %>%
+    column_to_rownames(var = "genome") %>%
+		filter(rowSums(.[, -1]) != 0) %>%
+		rownames()
+
+#Align KEGG annotations with present MAGs and remove all-zero and all-one traits
+present_MAGs <- present_MAGs[present_MAGs %in% rownames(genome_gifts)]
+genome_gifts_filt <- genome_gifts[present_MAGs,] %>%
+			select_if(~!all(. == 0)) %>%  #remove all-zero modules
+			select_if(~!all(. == 1)) #remove all-one modules
+
+#Filter count table to only contain present MAGs after KEGG filtering
+genome_counts_filt_filt <- genome_counts_filt %>%
+  column_to_rownames(var = "genome")
+
+genome_counts_filt_filt <- genome_counts_filt_filt[present_MAGs,]
+
+
+dist <- genome_gifts_filt %>%
+  to.elements(., GIFT_db) %>%
+  traits2dist(., method = "gower")
+
+functional <- genome_counts_filt_filt %>%
+  #column_to_rownames(var = "genome") %>%
+  #dplyr::select(where(~ !all(. == 0))) %>%
+  hilldiv(., q = 1, dist = dist) %>%
+  t() %>%
+  as.data.frame() %>%
+  dplyr::rename(functional = 1) %>%
+  rownames_to_column(var = "sample") %>%
+  mutate(functional = if_else(is.nan(functional), 1, functional))
+
+# Merge all metrics
+alpha_div <- richness %>%
+  full_join(neutral, by = join_by(sample == sample)) %>%
+  full_join(phylogenetic, by = join_by(sample == sample)) %>%
+  full_join(functional, by = join_by(sample == sample))
+```
+
+```{r alpha_div_plot, comment="", message=FALSE, warning=FALSE, fig.height=4, fig.width=10, fig.fullwidth=TRUE}
+alpha_div %>%
+  pivot_longer(-sample, names_to = "metric", values_to = "value") %>%
+  left_join(., sample_metadata, by = join_by(sample == EHI_number)) %>%
+  mutate(metric=factor(metric,levels=c("richness","neutral","phylogenetic","functional"))) %>%
+      ggplot(aes(y = value, x = Transect, group=Transect, color=Transect, fill=Transect)) +
+      geom_boxplot(outlier.shape = NA) +
+      geom_jitter(alpha=0.5) +
+      scale_color_manual(name="Transect",
+          breaks=c("Aisa","Aran","Sentein","Tourmalet"),
+          labels=c("Aisa","Aran","Sentein","Tourmalet"),
+          values=c("#e5bd5b", "#6b7398","#e2815a", "#876b96")) +
+      scale_fill_manual(name="Transect",
+          breaks=c("Aisa","Aran","Sentein","Tourmalet"),
+          labels=c("Aisa","Aran","Sentein","Tourmalet"),
+          values=c("#e5bd5b50", "#6b739850","#e2815a50", "#876b9650")) +
+      facet_wrap(. ~ metric, scales = "free", ncol=4) +
+      coord_cartesian(xlim = c(1, NA)) +
+      theme_classic() +
+      theme(
+        strip.background = element_blank(),
+        panel.grid.minor.x = element_line(size = .1, color = "grey"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1)
+      )
+```
+
+### Regression plots
+
+#### Richness diversity
+
+```{r alpha_div_richness_plot, message=FALSE, warning=FALSE, fig.height=4, fig.width=10, fig.fullwidth=TRUE}
+columns <- c("richness","neutral","phylo","func","mapped","total")
+alpha_div %>%
+			select(sample,richness) %>%
+			pivot_longer(-sample, names_to = "data", values_to = "value") %>%
+			mutate(data = factor(data, levels = columns))	%>%
+			left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+      ggplot(aes(x = Elevation, y = value)) +
+        geom_point() +
+        geom_smooth(method = lm) +
+        facet_wrap(~ factor(Transect))+
+        labs(x = "Elevation (m)")
+```
+
+#### Neutral diversity
+
+```{r alpha_div_neutral_plot, message=FALSE, warning=FALSE, fig.height=4, fig.width=10, fig.fullwidth=TRUE}
+alpha_div %>%
+			select(sample,neutral) %>%
+			pivot_longer(-sample, names_to = "data", values_to = "value") %>%
+			mutate(data = factor(data, levels = columns))	%>%
+			left_join(sample_metadata, by = join_by(sample == EHI_number))  %>%
+      ggplot(aes(x = Elevation, y = value)) +
+        geom_point() +
+        geom_smooth(method = lm) +
+        facet_wrap(~ factor(Transect))+
+        labs(x = "Elevation (m)")
+```
+
+#### Phylogenetic diversity
+
+```{r alpha_div_phylo_plot, message=FALSE, warning=FALSE, fig.height=4, fig.width=10, fig.fullwidth=TRUE}
+alpha_div %>%
+			select(sample,phylogenetic) %>%
+			pivot_longer(-sample, names_to = "data", values_to = "value") %>%
+			mutate(data = factor(data, levels = columns))	%>%
+			left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+      ggplot(aes(x = Elevation, y = value)) +
+        geom_point() +
+        geom_smooth(method = lm) +
+        facet_wrap(~ factor(Transect))+
+        labs(x = "Elevation (m)")
+```
+
+#### Functional diversities
+
+```{r alpha_div_func_plot, message=FALSE, warning=FALSE, fig.height=4, fig.width=10, fig.fullwidth=TRUE}
+alpha_div %>%
+			select(sample,functional) %>%
+			pivot_longer(-sample, names_to = "data", values_to = "value") %>%
+			mutate(data = factor(data, levels = columns))	%>%
+			left_join(sample_metadata, by = join_by(sample == EHI_number))  %>%
+      ggplot(aes(x = Elevation, y = value)) +
+        geom_point() +
+        geom_smooth(method = lm) +
+        facet_wrap(~ factor(Transect))+
+        labs(x = "Elevation (m)")
+```
+
+### Mixed models
+
+#### Richness diversity
+
+```{r mixed_models_richness, echo=TRUE, message=FALSE, warning=FALSE}
+#alpha_div %>%
+  #left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  #lmerTest::lmer(richness ~ log(sequencing_depth) + Elevation*Transect + (1 | Sampling_point), data = ., REML = FALSE) %>%
+  #broom.mixed::tidy() %>%
+  #tt()
+```
+
+#### Neutral diversity
+
+```{r mixed_models_neutral, echo=TRUE, message=FALSE, warning=FALSE}
+#alpha_div %>%
+  #left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  #lmerTest::lmer(neutral ~ log(sequencing_depth) + Elevation*Transect + (1|Sampling_point), data = ., REML = FALSE) %>%
+  #broom.mixed::tidy() %>%
+  #tt()
+```
+
+#### Phylogenetic diversity
+
+```{r mixed_models_phylo, echo=TRUE, message=FALSE, warning=FALSE}
+#alpha_div %>%
+  #left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  #lmerTest::lmer(phylogenetic ~ log(sequencing_depth) + Elevation*Transect + (1 | Sampling_point), data = ., REML = FALSE) %>%
+  #broom.mixed::tidy() %>%
+  #tt()
+```
+
+#### Functional diversities
+
+```{r mixed_models_func, echo=TRUE, message=FALSE, warning=FALSE}
+#alpha_div %>%
+  #left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  #lmerTest::lmer(functional ~ log(sequencing_depth) + Elevation*Transect + (1 | Sampling_point), data = ., REML = FALSE) %>%
+  #broom.mixed::tidy() %>%
+  #tt()
+```
+
+
+## Beta diversity
+
+```{r beta_div, comment="", message=FALSE, warning=FALSE}
+beta_q0n <- genome_counts_filt %>%
+  column_to_rownames(., "genome") %>%
+  hillpair(., q = 0)
+
+beta_q1n <- genome_counts_filt %>%
+  column_to_rownames(., "genome") %>%
+  hillpair(., q = 1)
+
+beta_q1p <- genome_counts_filt %>%
+  column_to_rownames(., "genome") %>%
+  hillpair(., q = 1, tree = genome_tree)
+
+beta_q1f <- genome_counts_filt_filt %>%
+  #column_to_rownames(., "genome") %>%
+  hillpair(., q = 1, dist = dist)
+```
