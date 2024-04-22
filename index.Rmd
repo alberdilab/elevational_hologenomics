@@ -1,6 +1,6 @@
 ---
 title: "AlberdiLab | Martin-Bideguren et al. 2024"
-subtitle: " "
+subtitle: "Study title to be added"
 author:
   - Garazi Martin-Bideguren^[University of Copenhagen, garazi.bideguren@sund.ku.dk]
   - Ostaizka Aizpurua^[University of Copenhagen, ostaizka.aizpurua@sund.ku.dk]
@@ -16,11 +16,11 @@ date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
 documentclass: book
 bibliography: [book.bib, packages.bib]
-url: https://alberdilab.github.io/elevation_hologenomics
+url: https://alberdilab.github.io/elevational_hologenomics
 description: |
   Data analysis code for the study on the recovery of metagenome‑assembled genomes and derived microbial communities from lizard fecal and cloacal samples.
 link-citations: yes
-github-repo: alberdilab/elevation_hologenomics
+github-repo: alberdilab/elevational_hologenomics
 ---
 
 ```{r knitr_opts, echo=FALSE}
@@ -46,7 +46,7 @@ RStudio > New Project > Version Control > Git
 
 And indicating the following git repository:
 
-> https://github.com/alberdilab/elevation_hologenomics.git
+> https://github.com/alberdilab/elevational_hologenomics.git
 
 Once the R project has been created, follow the instructions and code chunks shown in this webbook.
 

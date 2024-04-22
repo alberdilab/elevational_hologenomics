@@ -1,10 +1,3 @@
----
-title: "04_community_composition"
-author: "Garazi Martin Bideguren"
-date: "2024-04-09"
-output: html_document
----
-
 # Community composition
 
 ```{r load_data_community}
@@ -285,48 +278,48 @@ alpha_div %>%
 
 #### Richness diversity
 
-```{r mixed_models_richness, echo=TRUE, message=FALSE, warning=FALSE}
-#alpha_div %>%
-  #left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
-  #lmerTest::lmer(richness ~ log(sequencing_depth) + Elevation*Transect + (1 | Sampling_point), data = ., REML = FALSE) %>%
-  #broom.mixed::tidy() %>%
-  #tt()
+```{r mixed_models_richness, echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
+alpha_div %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  lmerTest::lmer(richness ~ log(sequencing_depth) + Elevation*Transect + (1 | Sampling_point), data = ., REML = FALSE) %>%
+  broom.mixed::tidy() %>%
+  tt()
 ```
 
 #### Neutral diversity
 
-```{r mixed_models_neutral, echo=TRUE, message=FALSE, warning=FALSE}
-#alpha_div %>%
-  #left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
-  #lmerTest::lmer(neutral ~ log(sequencing_depth) + Elevation*Transect + (1|Sampling_point), data = ., REML = FALSE) %>%
-  #broom.mixed::tidy() %>%
-  #tt()
+```{r mixed_models_neutral, echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
+alpha_div %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  lmerTest::lmer(neutral ~ log(sequencing_depth) + Elevation*Transect + (1|Sampling_point), data = ., REML = FALSE) %>%
+  broom.mixed::tidy() %>%
+  tt()
 ```
 
 #### Phylogenetic diversity
 
-```{r mixed_models_phylo, echo=TRUE, message=FALSE, warning=FALSE}
-#alpha_div %>%
-  #left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
-  #lmerTest::lmer(phylogenetic ~ log(sequencing_depth) + Elevation*Transect + (1 | Sampling_point), data = ., REML = FALSE) %>%
-  #broom.mixed::tidy() %>%
-  #tt()
+```{r mixed_models_phylo, echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
+alpha_div %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  lmerTest::lmer(phylogenetic ~ log(sequencing_depth) + Elevation*Transect + (1 | Sampling_point), data = ., REML = FALSE) %>%
+  broom.mixed::tidy() %>%
+  tt()
 ```
 
 #### Functional diversities
 
-```{r mixed_models_func, echo=TRUE, message=FALSE, warning=FALSE}
-#alpha_div %>%
-  #left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
-  #lmerTest::lmer(functional ~ log(sequencing_depth) + Elevation*Transect + (1 | Sampling_point), data = ., REML = FALSE) %>%
-  #broom.mixed::tidy() %>%
-  #tt()
+```{r mixed_models_func, echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
+alpha_div %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  lmerTest::lmer(functional ~ log(sequencing_depth) + Elevation*Transect + (1 | Sampling_point), data = ., REML = FALSE) %>%
+  broom.mixed::tidy() %>%
+  tt()
 ```
 
 
 ## Beta diversity
 
-```{r beta_div, comment="", message=FALSE, warning=FALSE}
+```{r beta_div, comment="", message=FALSE, warning=FALSE, eval=FALSE}
 beta_q0n <- genome_counts_filt %>%
   column_to_rownames(., "genome") %>%
   hillpair(., q = 0)

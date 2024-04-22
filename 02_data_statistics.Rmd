@@ -1,10 +1,3 @@
----
-title: "02_data_statistics"
-author: "Garazi Martin Bideguren"
-date: "2024-04-09"
-output: html_document
----
-
 # Data statistics
 
 ```{r load_data_stats}
