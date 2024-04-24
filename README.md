@@ -7,7 +7,7 @@ Data and code repository of the population-level metagenomic data of lizards acr
 
 ## 1. Study design
 
-Four different mountain transects, two on the Spanish side and two on the French side, were used to sample lizards across altitudinal gradients ranging from 900m to 2400 ASL. Per sampling point 4-5 individuals wre sampled to obtain faecal samples.
+Four different mountain transects, two on the Spanish side and two on the French side, were used to sample lizards across altitudinal gradients ranging from 900m to 2400 ASL. Per sampling point 4-5 individuals were sampled to obtain faecal samples.
 
 
 ## 2. Bioinformatic procedures
