@@ -19,7 +19,7 @@ Data processing to generate annotated metagenome-assembled genomes and genome co
 
 Samples from the four transects were analysed together and the code used can be found in the Rmd files stored in the root directory of this repository, while the bookdown-rendered webbook is available at:
 
-[alberdilab.github.io/elevational_hologenomics](https://alberdilab.github.io/elevational_hologenomics/)
+[alberdilab.github.io/elevational_hologenomics]()
 
 While the webbook provides a user-friendly overview of the procedures, analyses can be directly reproduced using the Rmd documents. Note that the code chunks that require heavy computation have been tuned off using 'eval=FALSE'. To re-render the webbook, you can use the following code:
 
