@@ -270,7 +270,6 @@ ls() %>%
 load("hmsc_bookdown/fit_model1_250_10.Rdata")
 
 varpart=computeVariancePartitioning(m)
-plotVariancePartitioning(hM=m,VP=varpart)
 
 # Compute variance partitioning
 varpart=computeVariancePartitioning(m)
