@@ -3,7 +3,7 @@ title: "AlberdiLab | Martin-Bideguren et al. 2024"
 subtitle: "Study title to be added"
 author:
   - Garazi Martin-Bideguren^[University of Copenhagen, garazi.bideguren@sund.ku.dk], Ostaizka Aizpurua^[University of Copenhagen, ostaizka.aizpurua@sund.ku.dk], Javier Abalos^[University of Valencia,  jal4@uv.es], Fabien Aubret^[Centre National de la Recherche Scientifique, faubret@gmail.com], Guillem Pérez i de Lanuza^[University of Valencia and Universidade do Porto, guillem.perez-lanuza@uv.es], Tom Sarraude^[, t.sarraude@gmail.com], Nathalie Feiner^[,  ], Tobias Uller^[University of Lund, tobias.uller@biol.lu.se], Aoife Leonard^[University of Copenhagen, aoife.leonard@sund.ku.dk] and Antton Alberdi^[University of Copenhagen, antton.alberdi@sund.ku.dk]
-date: "`r Sys.Date()`"
+date: "Last update: `r Sys.Date()`"
 site: bookdown::bookdown_site
 documentclass: book
 bibliography: [book.bib, packages.bib]
