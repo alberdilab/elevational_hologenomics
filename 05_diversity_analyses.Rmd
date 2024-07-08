@@ -1,0 +1,231 @@
+# Diversity analyses
+
+```{r load_data_community_1}
+load("data/data.Rdata")
+```
+
+## Alpha diversity
+
+```{r alpha_div, comment="", message=FALSE, warning=FALSE}
+# Calculate Hill numbers
+richness <- genome_counts_filt %>%
+  column_to_rownames(var = "genome") %>%
+  dplyr::select(where(~ !all(. == 0))) %>%
+  hilldiv(., q = 0) %>%
+  t() %>%
+  as.data.frame() %>%
+  dplyr::rename(richness = 1) %>%
+  rownames_to_column(var = "sample")
+
+neutral <- genome_counts_filt %>%
+  column_to_rownames(var = "genome") %>%
+  dplyr::select(where(~ !all(. == 0))) %>%
+  hilldiv(., q = 1) %>%
+  t() %>%
+  as.data.frame() %>%
+  dplyr::rename(neutral = 1) %>%
+  rownames_to_column(var = "sample")
+
+phylogenetic <- genome_counts_filt %>%
+  column_to_rownames(var = "genome") %>%
+  dplyr::select(where(~ !all(. == 0))) %>%
+  hilldiv(., q = 1, tree = genome_tree) %>%
+  t() %>%
+  as.data.frame() %>%
+  dplyr::rename(phylogenetic = 1) %>%
+  rownames_to_column(var = "sample")
+
+# Aggregate basal GIFT into elements
+#Get list of present MAGs
+present_MAGs <- genome_counts_filt %>%
+    column_to_rownames(var = "genome") %>%
+		filter(rowSums(.[, -1]) != 0) %>%
+		rownames()
+
+#Align KEGG annotations with present MAGs and remove all-zero and all-one traits
+present_MAGs <- present_MAGs[present_MAGs %in% rownames(genome_gifts)]
+genome_gifts_filt <- genome_gifts[present_MAGs,] %>%
+			select_if(~!all(. == 0)) %>%  #remove all-zero modules
+			select_if(~!all(. == 1)) #remove all-one modules
+
+#Filter count table to only contain present MAGs after KEGG filtering
+genome_counts_filt_filt <- genome_counts_filt %>%
+  column_to_rownames(var = "genome")
+
+genome_counts_filt_filt <- genome_counts_filt_filt[present_MAGs,]
+
+
+dist <- genome_gifts_filt %>%
+  to.elements(., GIFT_db) %>%
+  traits2dist(., method = "gower")
+
+functional <- genome_counts_filt_filt %>%
+  #column_to_rownames(var = "genome") %>%
+  #dplyr::select(where(~ !all(. == 0))) %>%
+  hilldiv(., q = 1, dist = dist) %>%
+  t() %>%
+  as.data.frame() %>%
+  dplyr::rename(functional = 1) %>%
+  rownames_to_column(var = "sample") %>%
+  mutate(functional = if_else(is.nan(functional), 1, functional))
+
+# Merge all metrics
+alpha_div <- richness %>%
+  full_join(neutral, by = join_by(sample == sample)) %>%
+  full_join(phylogenetic, by = join_by(sample == sample)) %>%
+  full_join(functional, by = join_by(sample == sample))
+```
+
+```{r alpha_div_plot, comment="", message=FALSE, warning=FALSE, fig.height=4, fig.width=10, fig.fullwidth=TRUE}
+alpha_div %>%
+  pivot_longer(-sample, names_to = "metric", values_to = "value") %>%
+  left_join(., sample_metadata, by = join_by(sample == EHI_number)) %>%
+  mutate(metric=factor(metric,levels=c("richness","neutral","phylogenetic","functional"))) %>%
+      ggplot(aes(y = value, x = Transect, group=Transect, color=Transect, fill=Transect)) +
+      geom_boxplot(outlier.shape = NA) +
+      geom_jitter(alpha=0.5) +
+      scale_color_manual(name="Transect",
+          breaks=c("Aisa","Aran","Sentein","Tourmalet"),
+          labels=c("Aisa","Aran","Sentein","Tourmalet"),
+          values=c("#e5bd5b", "#6b7398","#e2815a", "#876b96")) +
+      scale_fill_manual(name="Transect",
+          breaks=c("Aisa","Aran","Sentein","Tourmalet"),
+          labels=c("Aisa","Aran","Sentein","Tourmalet"),
+          values=c("#e5bd5b50", "#6b739850","#e2815a50", "#876b9650")) +
+      facet_wrap(. ~ metric, scales = "free", ncol=4) +
+      coord_cartesian(xlim = c(1, NA)) +
+      theme_classic() +
+      theme(
+        strip.background = element_blank(),
+        panel.grid.minor.x = element_line(size = .1, color = "grey"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1)
+      )
+```
+
+### Regression plots
+
+#### Richness diversity
+
+```{r alpha_div_richness_plot, message=FALSE, warning=FALSE, fig.height=4, fig.width=10, fig.fullwidth=TRUE}
+columns <- c("richness","neutral","phylo","func","mapped","total")
+alpha_div %>%
+			select(sample,richness) %>%
+			pivot_longer(-sample, names_to = "data", values_to = "value") %>%
+			mutate(data = factor(data, levels = columns))	%>%
+			left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+      ggplot(aes(x = Elevation, y = value)) +
+        geom_point() +
+        geom_smooth(method = lm) +
+        facet_wrap(~ factor(Transect))+
+        labs(x = "Elevation (m)")
+```
+
+#### Neutral diversity
+
+```{r alpha_div_neutral_plot, message=FALSE, warning=FALSE, fig.height=4, fig.width=10, fig.fullwidth=TRUE}
+alpha_div %>%
+			select(sample,neutral) %>%
+			pivot_longer(-sample, names_to = "data", values_to = "value") %>%
+			mutate(data = factor(data, levels = columns))	%>%
+			left_join(sample_metadata, by = join_by(sample == EHI_number))  %>%
+      ggplot(aes(x = Elevation, y = value)) +
+        geom_point() +
+        geom_smooth(method = lm) +
+        facet_wrap(~ factor(Transect))+
+        labs(x = "Elevation (m)")
+```
+
+#### Phylogenetic diversity
+
+```{r alpha_div_phylo_plot, message=FALSE, warning=FALSE, fig.height=4, fig.width=10, fig.fullwidth=TRUE}
+alpha_div %>%
+			select(sample,phylogenetic) %>%
+			pivot_longer(-sample, names_to = "data", values_to = "value") %>%
+			mutate(data = factor(data, levels = columns))	%>%
+			left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+      ggplot(aes(x = Elevation, y = value)) +
+        geom_point() +
+        geom_smooth(method = lm) +
+        facet_wrap(~ factor(Transect))+
+        labs(x = "Elevation (m)")
+```
+
+#### Functional diversities
+
+```{r alpha_div_func_plot, message=FALSE, warning=FALSE, fig.height=4, fig.width=10, fig.fullwidth=TRUE}
+alpha_div %>%
+			select(sample,functional) %>%
+			pivot_longer(-sample, names_to = "data", values_to = "value") %>%
+			mutate(data = factor(data, levels = columns))	%>%
+			left_join(sample_metadata, by = join_by(sample == EHI_number))  %>%
+      ggplot(aes(x = Elevation, y = value)) +
+        geom_point() +
+        geom_smooth(method = lm) +
+        facet_wrap(~ factor(Transect))+
+        labs(x = "Elevation (m)")
+```
+
+### Mixed models
+
+#### Richness diversity
+
+```{r mixed_models_richness, echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
+alpha_div %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  lmerTest::lmer(richness ~ log(sequencing_depth) + Elevation*Transect + (1 | Sampling_point), data = ., REML = FALSE) %>%
+  broom.mixed::tidy() %>%
+  tt()
+```
+
+#### Neutral diversity
+
+```{r mixed_models_neutral, echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
+alpha_div %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  lmerTest::lmer(neutral ~ log(sequencing_depth) + Elevation*Transect + (1|Sampling_point), data = ., REML = FALSE) %>%
+  broom.mixed::tidy() %>%
+  tt()
+```
+
+#### Phylogenetic diversity
+
+```{r mixed_models_phylo, echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
+alpha_div %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  lmerTest::lmer(phylogenetic ~ log(sequencing_depth) + Elevation*Transect + (1 | Sampling_point), data = ., REML = FALSE) %>%
+  broom.mixed::tidy() %>%
+  tt()
+```
+
+#### Functional diversities
+
+```{r mixed_models_func, echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
+alpha_div %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  lmerTest::lmer(functional ~ log(sequencing_depth) + Elevation*Transect + (1 | Sampling_point), data = ., REML = FALSE) %>%
+  broom.mixed::tidy() %>%
+  tt()
+```
+
+
+## Beta diversity
+
+```{r beta_div, comment="", message=FALSE, warning=FALSE, eval=FALSE}
+beta_q0n <- genome_counts_filt %>%
+  column_to_rownames(., "genome") %>%
+  hillpair(., q = 0)
+
+beta_q1n <- genome_counts_filt %>%
+  column_to_rownames(., "genome") %>%
+  hillpair(., q = 1)
+
+beta_q1p <- genome_counts_filt %>%
+  column_to_rownames(., "genome") %>%
+  hillpair(., q = 1, tree = genome_tree)
+
+beta_q1f <- genome_counts_filt_filt %>%
+  #column_to_rownames(., "genome") %>%
+  hillpair(., q = 1, dist = dist)
+```

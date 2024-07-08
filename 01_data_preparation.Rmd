@@ -10,7 +10,8 @@ Load the original data files outputted by the bioinformatic pipeline.
 sample_metadata <- read.csv("data/Pyrenees_metadata_all_v2.csv",sep=",",header=T)%>%
   filter(EHI_number != "EHI00102") %>%
   filter(EHI_number != "EHI00182") %>%
-  filter(EHI_number !="EHI00435")
+  filter(EHI_number !="EHI00435") %>%
+  filter(EHI_number !="EHI00126") #genome not P.muralis
 ```
 
 ### Read counts
@@ -18,15 +19,7 @@ sample_metadata <- read.csv("data/Pyrenees_metadata_all_v2.csv",sep=",",header=T
 ```{r load_read_counts, warning=FALSE, comments="", message=FALSE}
 read_counts <- read_tsv("data/DMB0113_counts.tsv") %>%
   rename(genome = 1) %>%
-  select(-EHI00102, -EHI00182,-EHI00435) #remove samples
-```
-
-### Genome base hits
-
-```{r load_genome_hits, warning=FALSE, comments="", message=FALSE}
-genome_coverage <- read_tsv("data/DMB0113_coverage.tsv") %>%
-  rename(genome = 1) %>%
-  select(-EHI00102, -EHI00182,-EHI00435) #remove samples
+  select(-EHI00102, -EHI00182,-EHI00435,-EHI00126) #remove samples
 ```
 
 ### Genome taxonomy
@@ -34,6 +27,15 @@ genome_coverage <- read_tsv("data/DMB0113_coverage.tsv") %>%
 ```{r load_genome_metadata, warning=FALSE, comments="", message=FALSE}
 genome_metadata <- read_tsv("data/DMB0113_mag_info.tsv") %>%
     rename(length=mag_size)
+```
+
+### Genome base hits
+
+```{r load_genome_hits, warning=FALSE, comments="", message=FALSE}
+genome_coverage <- read_tsv("data/DMB0113_coverage.tsv") %>%
+  rename(genome = 1) %>%
+  select(-EHI00102, -EHI00182,-EHI00435,-EHI00126) %>% #remove samples
+  semi_join(genome_metadata, by = "genome")
 ```
 
 ### Genome tree
@@ -60,6 +62,9 @@ Transform the original data files into working objects for downstream analyses.
 ### Filter reads by coverage
 
 ```{r filter_coverage, warning=FALSE, comments="", message=FALSE}
+read_counts <- read_counts %>%
+  semi_join(genome_metadata, by = "genome")
+
 min_coverage=0.3
 read_counts_filt <- genome_coverage %>%
   mutate(across(where(is.numeric), ~ ifelse(. > min_coverage, 1, 0))) %>%

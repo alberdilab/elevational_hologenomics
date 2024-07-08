@@ -6,8 +6,8 @@ prepare-data
 load-data
 sample-metadata
 read-counts
-genome-base-hits
 genome-taxonomy
+genome-base-hits
 genome-tree
 genome-annotations
 create-working-objects
@@ -15,6 +15,7 @@ filter-reads-by-coverage
 transform-reads-into-genome-counts
 prepare-color-scheme
 wrap-working-objects
+data-summary
 data-statistics
 sequencing-reads-statistics
 sequencing-depth
@@ -32,6 +33,7 @@ phylum-relative-abundances
 taxonomy-boxplot
 family
 genus
+diversity-analyses
 alpha-diversity
 regression-plots
 richness-diversity
@@ -44,10 +46,7 @@ neutral-diversity-1
 phylogenetic-diversity-1
 functional-diversities-1
 beta-diversity
-data-preparatiom
-mag-functional-annotations
-wrap-working-objects-1
-hmsc
+hmsc-set-up
 load-data-1
 subsetting
 define-formulas-of-the-hmsc-model
@@ -56,4 +55,15 @@ define-mcmc
 generate-hmsc-executables
 fit-hmsc-models-in-mjolnir-hpc
 assess-chain-convergence
+hmsc-analysis
+load-data-2
 compute-variance-partitioning
+elevation-predictions
+responses-to-elevation
+functional-predictions
+element-level
+gift-test-visualization
+functional-level
+gift-test-visualization-1
+domain-level
+gift-test-visualization-2

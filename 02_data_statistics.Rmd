@@ -1,8 +1,80 @@
-# Data statistics
+# Data summary
+
 
 ```{r load_data_stats}
 load("data/data.Rdata")
 ```
+
+Summary of sampled individuals and analysed faecal samples.
+
+```{r sample_description, message=FALSE}
+#number of samples
+length(sample_metadata$EHI_number)
+
+#number of samples by transect
+sample_metadata %>%
+  group_by(Transect) %>%
+  summarise(n_samples = length(EHI_number)) %>%
+  tt()
+
+#number of samples by transect and elevation
+sample_metadata %>%
+  group_by(Transect, Elevation) %>%
+  summarise(n_samples = length(EHI_number)) %>%
+  tt()
+
+#n of analysed faecal samples
+ncol(read_counts)
+
+```
+
+Geographical location of sampled lizards in the Pyrenees.
+
+```{r map, warning=FALSE, fig.height=8, fig.width=10, fig.fullwidth=TRUE}
+#Summarise for generating map
+options(dplyr.summarise.inform = FALSE)
+sample_metadata_summary <- sample_metadata %>%
+  #Group by geography and count samples
+  select(EHI_number, latitude, longitude, Transect) %>%
+  group_by(latitude, longitude, Transect) %>%
+  summarize(count = n()) %>%
+  ungroup()
+
+#plotting on map
+## Determine the longitude and latitude ranges
+lon_range <- range(sample_metadata_summary$longitude, na.rm = TRUE)
+lat_range <- range(sample_metadata_summary$latitude, na.rm = TRUE)
+
+sample_metadata_summary %>%
+  ggplot(.) +
+  #render map
+  geom_map(
+    data=map_data("world"),
+    map = map_data("world"),
+    aes(long, lat, map_id=region),
+    color = "white", fill = "#cccccc", linewidth = 0.2
+  ) +
+  #render points
+  geom_point(
+    aes(x=longitude,y=latitude, color=Transect),
+    alpha=0.5, shape=16) +
+  #add general plot layout
+  theme_minimal() +
+  theme(legend.position = "right",
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank()
+  ) + coord_map("mercator", xlim = lon_range, ylim = lat_range)
+```
+
+
+```{r summary_table, include=FALSE}
+#summary table
+sample_metadata %>%
+  select(EHI_number,Transect,Elevation,latitude,longitude) %>%
+  tt()
+```
+
+# Data statistics
 
 ## Sequencing reads statistics
 
