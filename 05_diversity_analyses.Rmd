@@ -75,6 +75,29 @@ alpha_div <- richness %>%
   full_join(phylogenetic, by = join_by(sample == sample)) %>%
   full_join(functional, by = join_by(sample == sample))
 ```
+```{r alpha_div_summary, comment="", message=FALSE, warning=FALSE, fig.height=4, fig.width=10, fig.fullwidth=TRUE}
+alpha_div %>%
+  pivot_longer(-sample, names_to = "alpha", values_to = "value") %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+    group_by(alpha)%>%
+    summarise(
+              Aisa_mean=mean(value[Transect=="Aisa"], na.rm=T),
+              Aisa_sd=sd(value[Transect=="Aisa"], na.rm=T),
+              Aran_mean=mean(value[Transect=="Aran"], na.rm=T),
+              Aran_sd=sd(value[Transect=="Aran"], na.rm=T),
+              Sentein_mean=mean(value[Transect=="Sentein"], na.rm=T),
+              Sentein_sd=sd(value[Transect=="Sentein"], na.rm=T),
+              Tourmalet_mean=mean(value[Transect=="Tourmalet"], na.rm=T),
+              Tourmalet_sd=sd(value[Transect=="Tourmalet"], na.rm=T))%>%
+    mutate(
+           Aisa=str_c(round(Aisa_mean,2),"±",round(Aisa_sd,2)),
+           Aran=str_c(round(Aran_mean,2),"±",round(Aran_sd,2)),
+           Sentein=str_c(round(Sentein_mean,2),"±",round(Sentein_sd,2)),
+           Tourmalet=str_c(round(Tourmalet_mean,2),"±",round(Tourmalet_sd,2))) %>% 
+    arrange(-Aisa_mean) %>% 
+    dplyr::select(alpha,Aisa,Aran,Sentein,Tourmalet) %>% 
+    tt()
+```
 
 ```{r alpha_div_plot, comment="", message=FALSE, warning=FALSE, fig.height=4, fig.width=10, fig.fullwidth=TRUE}
 alpha_div %>%
@@ -94,14 +117,15 @@ alpha_div %>%
           values=c("#e5bd5b50", "#6b739850","#e2815a50", "#876b9650")) +
       facet_wrap(. ~ metric, scales = "free", ncol=4) +
       coord_cartesian(xlim = c(1, NA)) +
+      stat_compare_means(size=2) +
       theme_classic() +
       theme(
         strip.background = element_blank(),
         panel.grid.minor.x = element_line(size = .1, color = "grey"),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
         axis.text.x = element_text(angle = 45, hjust = 1)
-      )
+      ) +
+  ylab("Alpha diversity")      
+      
 ```
 
 ### Regression plots
@@ -172,43 +196,62 @@ alpha_div %>%
 #### Richness diversity
 
 ```{r mixed_models_richness, echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
-alpha_div %>%
+richness_cor<-alpha_div %>%
   left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
   lmerTest::lmer(richness ~ log(sequencing_depth) + Elevation*Transect + (1 | Sampling_point), data = ., REML = FALSE) %>%
   broom.mixed::tidy() %>%
   tt()
 ```
 
+```{r mixed_models_richness_df, echo=FALSE, message=FALSE, warning=FALSE}
+richness_cor %>%
+  tt()
+```
+
 #### Neutral diversity
 
 ```{r mixed_models_neutral, echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
-alpha_div %>%
+neutral_cor<-alpha_div %>%
   left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
   lmerTest::lmer(neutral ~ log(sequencing_depth) + Elevation*Transect + (1|Sampling_point), data = ., REML = FALSE) %>%
   broom.mixed::tidy() %>%
   tt()
 ```
 
+```{r mixed_models_neutral_df, echo=FALSE, message=FALSE, warning=FALSE}
+neutral_cor %>%
+  tt()
+```
+
 #### Phylogenetic diversity
 
 ```{r mixed_models_phylo, echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
-alpha_div %>%
+phylo_cor<-alpha_div %>%
   left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
   lmerTest::lmer(phylogenetic ~ log(sequencing_depth) + Elevation*Transect + (1 | Sampling_point), data = ., REML = FALSE) %>%
   broom.mixed::tidy() %>%
   tt()
 ```
 
+```{r mixed_models_phylo_df, echo=FALSE, message=FALSE, warning=FALSE}
+phylo_cor %>%
+  tt()
+```
+
 #### Functional diversities
 
 ```{r mixed_models_func, echo=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
-alpha_div %>%
+func_cor<-alpha_div %>%
   left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
   lmerTest::lmer(functional ~ log(sequencing_depth) + Elevation*Transect + (1 | Sampling_point), data = ., REML = FALSE) %>%
   broom.mixed::tidy() %>%
   tt()
 ```
 
+```{r mixed_models_func_df, echo=FALSE, message=FALSE, warning=FALSE}
+func_cor %>%
+  tt()
+```
 
 ## Beta diversity
 
