@@ -51,8 +51,11 @@ phylum_summary <- genome_counts_filt %>%
 
 phylum_summary %>%
     group_by(phylum) %>%
-    summarise(mean=mean(relabun*100),sd=sd(relabun*100)) %>%
-    arrange(-mean) %>%
+    summarise(total_mean=mean(relabun*100, na.rm=T),
+              total_sd=sd(relabun*100, na.rm=T))  %>%
+    mutate(total=str_c(round(total_mean,2),"±",round(total_sd,2))) %>% 
+    arrange(-total_mean) %>% 
+    dplyr::select(phylum,total) %>% 
     tt()
 ```
 
