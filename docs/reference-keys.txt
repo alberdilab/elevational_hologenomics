@@ -26,6 +26,7 @@ genome-phylogeny
 genome-quality
 functional-overview
 functional-ordination
+mags-shared-across-transects
 community-composition
 taxonomy-overview
 stacked-barplot
