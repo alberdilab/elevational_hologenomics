@@ -51,7 +51,7 @@ phylum_summary <- genome_counts_filt %>%
 
 phylum_summary %>%
     group_by(phylum) %>%
-    summarise(mean=mean(relabun),sd=sd(relabun)) %>%
+    summarise(mean=mean(relabun*100),sd=sd(relabun*100)) %>%
     arrange(-mean) %>%
     tt()
 ```
@@ -92,6 +92,28 @@ family_summary %>%
     tt()
 ```
 
+```{r taxonomy_family_summary_plot, warning=FALSE, comments="", message=FALSE}
+family_arrange <- family_summary %>%
+    group_by(family) %>%
+    summarise(mean=sum(relabun)) %>%
+    arrange(-mean) %>%
+    select(family) %>%
+    pull()
+
+family_summary %>%
+    left_join(genome_metadata %>% select(family,phylum) %>% unique(),by=join_by(family==family)) %>%
+    left_join(sample_metadata,by=join_by(sample==EHI_number)) %>%
+    filter(family %in% family_arrange[1:20]) %>%
+    mutate(family=factor(family,levels=rev(family_arrange[1:20]))) %>%
+    filter(relabun > 0) %>%
+    ggplot(aes(x=relabun, y=family, group=family, color=phylum)) +
+        scale_color_manual(values=phylum_colors[-8]) +
+        geom_jitter(alpha=0.5) + 
+        theme_minimal() + 
+        labs(y="Family", x="Relative abundance", color="Phylum")
+```
+
+
 
 ### Genus
 ```{r taxonomy_genus_summary, warning=FALSE, comments="", message=FALSE}
@@ -109,4 +131,28 @@ genus_summary %>%
     summarise(mean=mean(relabun),sd=sd(relabun)) %>%
     arrange(-mean) %>%
     tt()
+```
+
+```{r taxonomy_genus_summary_plot, warning=FALSE, comments="", message=FALSE}
+genus_arrange <- genus_summary %>%
+    group_by(genus) %>%
+    summarise(mean=sum(relabun)) %>%
+    filter(genus != "g__")%>%
+    arrange(-mean) %>%
+    select(genus) %>%
+    mutate(genus= sub("^g__", "", genus)) %>%
+    pull()
+
+genus_summary %>%
+    left_join(genome_metadata %>% select(genus,phylum) %>% unique(),by=join_by(genus==genus)) %>%
+    left_join(sample_metadata,by=join_by(sample==EHI_number)) %>%
+    mutate(genus= sub("^g__", "", genus)) %>%
+    filter(genus %in% genus_arrange[1:20]) %>%
+    mutate(genus=factor(genus,levels=rev(genus_arrange[1:20]))) %>%
+    filter(relabun > 0) %>%
+    ggplot(aes(x=relabun, y=genus, group=genus, color=phylum)) +
+        scale_color_manual(values=phylum_colors[-c(3,4,6,8)]) +
+        geom_jitter(alpha=0.5) + 
+        theme_minimal() + 
+        labs(y="Family", x="Relative abundance", color="Phylum")
 ```

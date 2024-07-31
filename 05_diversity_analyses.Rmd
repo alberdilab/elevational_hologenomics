@@ -203,7 +203,7 @@ richness_cor<-alpha_div %>%
   tt()
 ```
 
-```{r mixed_models_richness_df, echo=FALSE, message=FALSE, warning=FALSE}
+```{r mixed_models_richness_df, echo=FALSE, message=FALSE, warning=FALSE,fig.height=4, fig.width=10, fig.fullwidth=TRUE}
 richness_cor %>%
   tt()
 ```
@@ -218,7 +218,7 @@ neutral_cor<-alpha_div %>%
   tt()
 ```
 
-```{r mixed_models_neutral_df, echo=FALSE, message=FALSE, warning=FALSE}
+```{r mixed_models_neutral_df, echo=FALSE, message=FALSE, warning=FALSE,fig.height=4, fig.width=10, fig.fullwidth=TRUE}
 neutral_cor %>%
   tt()
 ```
@@ -233,7 +233,7 @@ phylo_cor<-alpha_div %>%
   tt()
 ```
 
-```{r mixed_models_phylo_df, echo=FALSE, message=FALSE, warning=FALSE}
+```{r mixed_models_phylo_df, echo=FALSE, message=FALSE, warning=FALSE,fig.height=4, fig.width=10, fig.fullwidth=TRUE}
 phylo_cor %>%
   tt()
 ```
@@ -248,7 +248,7 @@ func_cor<-alpha_div %>%
   tt()
 ```
 
-```{r mixed_models_func_df, echo=FALSE, message=FALSE, warning=FALSE}
+```{r mixed_models_func_df, echo=FALSE, message=FALSE, warning=FALSE,fig.height=4, fig.width=10, fig.fullwidth=TRUE}
 func_cor %>%
   tt()
 ```
