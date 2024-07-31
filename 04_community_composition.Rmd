@@ -39,6 +39,129 @@ ggplot(genome_counts_filt_met, aes(x=interaction_var,y=count,fill=phylum, group=
     facet_wrap(~Transect, scales = "free", labeller = as_labeller(function(label) gsub(".*\\.", "", label))) #only show elevation label
 ```
 
+#### Number of bacteria phyla
+
+```{r phyla, comment="", echo=FALSE, message=FALSE, warning=FALSE}
+genome_metadata %>% 
+  filter(domain == "d__Bacteria")%>%
+  dplyr::select(phylum) %>%
+  unique() %>%
+  pull() %>%
+  length()
+```
+
+#### Bacteria phyla in Aisa transect
+
+```{r taxonomy_phylum_summary_Aisa, warning=FALSE, comments="", message=FALSE}
+phylum_summary_aisa <- genome_counts_filt %>%
+  mutate_at(vars(-genome),~./sum(.)) %>% #apply TSS normalisation
+  pivot_longer(-genome, names_to = "sample", values_to = "count") %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  left_join(genome_metadata, by = join_by(genome == genome)) %>%
+  group_by(sample,phylum) %>%
+  summarise(relabun=sum(count)) %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  filter(Transect=="Aisa")%>%
+  filter(relabun > 0)
+
+# Number of bacterial phyla Aisa
+length(unique(phylum_summary_aisa$phylum))
+
+# Bacteria phyla
+phylum_summary_aisa %>%
+    group_by(phylum) %>%
+    summarise(total_mean=mean(relabun*100, na.rm=TRUE),
+              total_sd=sd(relabun*100, na.rm=TRUE))  %>%
+    mutate(total=str_c(round(total_mean,2),"±",round(total_sd,2))) %>% 
+    arrange(-total_mean) %>% 
+    dplyr::select(phylum,total) %>% 
+    tt()
+```
+
+#### Bacteria phyla in Aran transect
+
+```{r taxonomy_phylum_summary_Aran, warning=FALSE, comments="", message=FALSE}
+phylum_summary_aran <- genome_counts_filt %>%
+  mutate_at(vars(-genome),~./sum(.)) %>% #apply TSS normalisation
+  pivot_longer(-genome, names_to = "sample", values_to = "count") %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  left_join(genome_metadata, by = join_by(genome == genome)) %>%
+  group_by(sample,phylum) %>%
+  summarise(relabun=sum(count)) %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  filter(Transect=="Aran")%>%
+  filter(relabun > 0)
+
+# Number of bacterial phyla Aran
+length(unique(phylum_summary_aran$phylum))
+
+# Bacteria phyla
+phylum_summary_aran %>%
+    group_by(phylum) %>%
+    summarise(total_mean=mean(relabun*100, na.rm=TRUE),
+              total_sd=sd(relabun*100, na.rm=TRUE))  %>%
+    mutate(total=str_c(round(total_mean,2),"±",round(total_sd,2))) %>% 
+    arrange(-total_mean) %>% 
+    dplyr::select(phylum,total) %>% 
+    tt()
+```
+
+#### Bacteria phyla in Sentein transect
+
+```{r taxonomy_phylum_summary_Sentein, warning=FALSE, comments="", message=FALSE}
+phylum_summary_sentein <- genome_counts_filt %>%
+  mutate_at(vars(-genome),~./sum(.)) %>% #apply TSS normalisation
+  pivot_longer(-genome, names_to = "sample", values_to = "count") %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  left_join(genome_metadata, by = join_by(genome == genome)) %>%
+  group_by(sample,phylum) %>%
+  summarise(relabun=sum(count)) %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  filter(Transect=="Sentein")%>%
+  filter(relabun > 0.)
+
+# Number of bacterial phyla Sentein
+length(unique(phylum_summary_sentein$phylum))
+
+# Bacteria phyla
+phylum_summary_sentein %>%
+    group_by(phylum) %>%
+    summarise(total_mean=mean(relabun*100, na.rm=TRUE),
+              total_sd=sd(relabun*100, na.rm=TRUE))  %>%
+    mutate(total=str_c(round(total_mean,2),"±",round(total_sd,2))) %>% 
+    arrange(-total_mean) %>% 
+    dplyr::select(phylum,total) %>% 
+    tt()
+```
+
+#### Bacteria phyla in Tourmalet transect
+
+```{r taxonomy_phylum_summary_Tourmalet, warning=FALSE, comments="", message=FALSE}
+phylum_summary_tourmalet <- genome_counts_filt %>%
+  mutate_at(vars(-genome),~./sum(.)) %>% #apply TSS normalisation
+  pivot_longer(-genome, names_to = "sample", values_to = "count") %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  left_join(genome_metadata, by = join_by(genome == genome)) %>%
+  group_by(sample,phylum) %>%
+  summarise(relabun=sum(count)) %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  filter(Transect=="Tourmalet")
+
+# Number of bacterial phyla Tourmalet
+length(unique(phylum_summary_tourmalet$phylum))
+
+# Bacteria phyla
+phylum_summary_tourmalet %>%
+    group_by(phylum) %>%
+    summarise(total_mean=mean(relabun*100, na.rm=TRUE),
+              total_sd=sd(relabun*100, na.rm=TRUE))  %>%
+    mutate(total=str_c(round(total_mean,2),"±",round(total_sd,2))) %>% 
+    arrange(-total_mean) %>% 
+    dplyr::select(phylum,total) %>% 
+    tt()
+```
+
+
 ### Phylum relative abundances
 ```{r taxonomy_phylum_summary, warning=FALSE, comments="", message=FALSE}
 phylum_summary <- genome_counts_filt %>%
