@@ -205,3 +205,26 @@ function_ordination <- tSNE_function$Y %>%
 
 function_ordination
 ```
+
+## MAGs shared across transects
+
+```{r upset_plot, message=FALSE, fig.height=8, fig.width=10, fig.fullwidth=TRUE}
+genome_counts_rel <- genome_counts_filt_filt %>%
+  mutate_at(vars(-genome),~./sum(.)) %>%
+  column_to_rownames(., "genome")
+genome_counts_rel_pa=1*(genome_counts_rel>0)
+
+table_upset_analysis_cont=t(aggregate(t(genome_counts_rel_pa),by=list(sample_metadata$Transect),FUN=sum)[,-1])
+colnames(table_upset_analysis_cont)=levels(as.factor(sample_metadata$Transect))
+table_upset_analysis=(table_upset_analysis_cont>0)*1
+table_upset_analysis=data.frame(table_upset_analysis)
+table_upset_analysis=apply(table_upset_analysis,2,as.integer)
+rownames(table_upset_analysis) <- rownames(genome_counts_rel_pa)
+
+locationcolors=c("#e5bd5b", "#6b7398","#e2815a", "#876b96")
+upset(as.data.frame(table_upset_analysis),
+      keep.order = T,
+      sets = rev(c("Aisa","Aran","Sentein","Tourmalet")),
+      sets.bar.color= rev(locationcolors),
+      mb.ratio = c(0.55, 0.45), order.by = "freq")
+```

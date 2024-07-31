@@ -391,7 +391,7 @@ positive <- element_predictions %>%
   select(-negative_support) %>%
   rename(support=positive_support)
 
-#Neatively assodiacted
+#Negatively associated
 negative <- element_predictions %>%
   filter(mean <0) %>%
   arrange(mean) %>%
@@ -399,13 +399,26 @@ negative <- element_predictions %>%
   select(-positive_support) %>%
   rename(support=negative_support)
 
-bind_rows(positive,negative) %>%
+all_elements <- bind_rows(positive,negative) %>%
   left_join(GIFT_db,by=join_by(trait==Code_element)) %>%
   mutate(trait=factor(trait,levels=c(rev(positive$trait),rev(negative$trait)))) %>%
-  ggplot(aes(x=mean, y=fct_rev(trait), xmin=p1, xmax=p9, color=Function)) +
+  mutate(Code_function=factor(Code_function)) %>%
+  mutate(element_legend=str_c(trait," - ",Element)) %>%
+  mutate(function_legend=str_c(Code_function," - ",Function)) %>%
+  select(trait,mean,p1,p9,element_legend,function_legend) %>% 
+  unique()
+
+gift_colors <- read_tsv("data/gift_colors.tsv") %>% 
+  mutate(legend=str_c(Code_function," - ",Function))  %>% 
+  filter(legend %in% all_elements$function_legend)
+
+all_elements %>%
+  ggplot(aes(x=mean, y=fct_reorder(element_legend, mean), xmin=p1, xmax=p9, color=function_legend)) +
       geom_point() +
       geom_errorbar() +
-      scale_color_manual(values = c("#debc14","#440526","#dc7c17","#172742","#00C19F","#619CFF","#A4006E","#FFCCCC","#357379","#6c7e2c","#d8dc69","#774d35","#db717d", "#dd3d2d","#c2a5cf","#00c0ff50" )) +
+      xlim(c(-0.1,0.09)) +
+      geom_vline(xintercept=0) +
+      scale_color_manual(values = gift_colors$Color) +
       theme_minimal() +
       labs(x="Regression coefficient",y="Functional trait")
 ```
@@ -557,6 +570,32 @@ p2 %>%
 #Negatively associated (there isn't)
 ```
 
+```{r hmsc_community_function_predictions_model_1_2, warning=FALSE, comments="", message=FALSE,fig.height=10, fig.width=10, fig.fullwidth=TRUE}
+
+all_functions <- function_predictions %>%
+  left_join(GIFT_db,by=join_by(trait==Code_function)) %>%
+  mutate(trait=factor(trait)) %>%
+  mutate(function_legend=str_c(trait," - ",Function)) %>%
+  select(trait,mean,p1,p9,function_legend) %>% 
+  unique()
+
+gift_colors <- read_tsv("data/gift_colors.tsv") %>% 
+  mutate(legend=str_c(Code_function," - ",Function))  %>% 
+  filter(legend %in% all_functions$function_legend)
+
+all_functions %>%
+  ggplot(aes(x=mean, y=fct_reorder(function_legend, mean), xmin=p1, xmax=p9, color=function_legend)) +
+      geom_point() +
+      geom_errorbar() +
+      xlim(c(-0.05,0.05)) +
+      geom_vline(xintercept=0) +
+      scale_color_manual(values = gift_colors$Color) +
+      theme_minimal() +
+      labs(x="Regression coefficient",y="Functional trait") +
+      guides(col = guide_legend(ncol = 1))
+```
+
+
 ```{r hmsc_community_function_predictions_plot, warning=FALSE, comments="", message=FALSE, fig.height=10, fig.width=10, fig.fullwidth=TRUE}
 community_functions %>%
 	bind_rows() %>%
@@ -689,6 +728,25 @@ p3 %>%
   tt()
 
 # Negatively associated (there isn't)
+```
+
+```{r hmsc_community_domain_predictions_model_1_2, warning=FALSE, comments="", message=FALSE,fig.height=10, fig.width=10, fig.fullwidth=TRUE}
+all_domains <- domain_predictions %>%
+  left_join(GIFT_db,by=join_by(trait==Code_function)) %>%
+  mutate(trait=factor(trait)) %>%
+  mutate(function_legend=str_c(trait," - ",Function)) %>%
+  select(trait,mean,p1,p9) %>% 
+  unique()
+
+all_domains %>%
+  ggplot(aes(x=mean, y=fct_reorder(trait, mean), xmin=p1, xmax=p9, color=trait)) +
+      geom_point() +
+      geom_errorbar() +
+      xlim(c(-0.02,0.02)) +
+      geom_vline(xintercept=0) +
+      theme_minimal() +
+      labs(x="Regression coefficient",y="Domain level") +
+      guides(col = guide_legend(ncol = 1))
 ```
 
 
