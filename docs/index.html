@@ -2066,6 +2066,7 @@ color: #a52929;
 <li class="chapter" data-level="5.2" data-path="mag-catalogue.html"><a href="mag-catalogue.html#genome-quality"><i class="fa fa-check"></i><b>5.2</b> Genome quality</a></li>
 <li class="chapter" data-level="5.3" data-path="mag-catalogue.html"><a href="mag-catalogue.html#functional-overview"><i class="fa fa-check"></i><b>5.3</b> Functional overview</a></li>
 <li class="chapter" data-level="5.4" data-path="mag-catalogue.html"><a href="mag-catalogue.html#functional-ordination"><i class="fa fa-check"></i><b>5.4</b> Functional ordination</a></li>
+<li class="chapter" data-level="5.5" data-path="mag-catalogue.html"><a href="mag-catalogue.html#mags-shared-across-transects"><i class="fa fa-check"></i><b>5.5</b> MAGs shared across transects</a></li>
 </ul></li>
 <li class="chapter" data-level="6" data-path="community-composition.html"><a href="community-composition.html"><i class="fa fa-check"></i><b>6</b> Community composition</a>
 <ul>
@@ -2141,7 +2142,7 @@ color: #a52929;
 <h1 class="title">AlberdiLab | Martin-Bideguren et al. 2024</h1>
 <h2 class="subtitle"><em>Study title to be added</em></h2>
 <p class="author"><em>Garazi Martin-Bideguren<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>, Ostaizka Aizpurua<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>, Javier Abalos<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>, Fabien Aubret<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>, Guillem Pérez i de Lanuza<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>, Tom Sarraude<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a>, Nathalie Feiner<a href="#fn7" class="footnote-ref" id="fnref7"><sup>7</sup></a>, Tobias Uller<a href="#fn8" class="footnote-ref" id="fnref8"><sup>8</sup></a>, Aoife Leonard<a href="#fn9" class="footnote-ref" id="fnref9"><sup>9</sup></a> and Antton Alberdi<a href="#fn10" class="footnote-ref" id="fnref10"><sup>10</sup></a></em></p>
-<p class="date"><em>Last update: 2024-07-31</em></p>
+<p class="date"><em>Last update: 2024-08-05</em></p>
 </div>
 <div id="introduction" class="section level1 hasAnchor" number="1">
 <h1><span class="header-section-number">Chapter 1</span> Introduction<a href="index.html#introduction" class="anchor-section" aria-label="Anchor link to header"></a></h1>
@@ -2182,17 +2183,18 @@ color: #a52929;
 <span id="cb2-19"><a href="index.html#cb2-19" tabindex="-1"></a><span class="fu">library</span>(ggtreeExtra)</span>
 <span id="cb2-20"><a href="index.html#cb2-20" tabindex="-1"></a><span class="fu">library</span>(ggtree)</span>
 <span id="cb2-21"><a href="index.html#cb2-21" tabindex="-1"></a><span class="fu">library</span>(ggh4x)</span>
-<span id="cb2-22"><a href="index.html#cb2-22" tabindex="-1"></a></span>
-<span id="cb2-23"><a href="index.html#cb2-23" tabindex="-1"></a><span class="co"># For statistics</span></span>
-<span id="cb2-24"><a href="index.html#cb2-24" tabindex="-1"></a><span class="fu">library</span>(spaa)</span>
-<span id="cb2-25"><a href="index.html#cb2-25" tabindex="-1"></a><span class="fu">library</span>(vegan)</span>
-<span id="cb2-26"><a href="index.html#cb2-26" tabindex="-1"></a><span class="fu">library</span>(Rtsne)</span>
-<span id="cb2-27"><a href="index.html#cb2-27" tabindex="-1"></a><span class="fu">library</span>(geiger)</span>
-<span id="cb2-28"><a href="index.html#cb2-28" tabindex="-1"></a><span class="fu">library</span>(hilldiv2)</span>
-<span id="cb2-29"><a href="index.html#cb2-29" tabindex="-1"></a><span class="fu">library</span>(distillR)</span>
-<span id="cb2-30"><a href="index.html#cb2-30" tabindex="-1"></a><span class="fu">library</span>(broom.mixed)</span>
-<span id="cb2-31"><a href="index.html#cb2-31" tabindex="-1"></a><span class="fu">library</span>(Hmsc)</span>
-<span id="cb2-32"><a href="index.html#cb2-32" tabindex="-1"></a><span class="fu">library</span>(corrplot)</span></code></pre></div>
+<span id="cb2-22"><a href="index.html#cb2-22" tabindex="-1"></a><span class="fu">library</span>(UpSetR)</span>
+<span id="cb2-23"><a href="index.html#cb2-23" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="index.html#cb2-24" tabindex="-1"></a><span class="co"># For statistics</span></span>
+<span id="cb2-25"><a href="index.html#cb2-25" tabindex="-1"></a><span class="fu">library</span>(spaa)</span>
+<span id="cb2-26"><a href="index.html#cb2-26" tabindex="-1"></a><span class="fu">library</span>(vegan)</span>
+<span id="cb2-27"><a href="index.html#cb2-27" tabindex="-1"></a><span class="fu">library</span>(Rtsne)</span>
+<span id="cb2-28"><a href="index.html#cb2-28" tabindex="-1"></a><span class="fu">library</span>(geiger)</span>
+<span id="cb2-29"><a href="index.html#cb2-29" tabindex="-1"></a><span class="fu">library</span>(hilldiv2)</span>
+<span id="cb2-30"><a href="index.html#cb2-30" tabindex="-1"></a><span class="fu">library</span>(distillR)</span>
+<span id="cb2-31"><a href="index.html#cb2-31" tabindex="-1"></a><span class="fu">library</span>(broom.mixed)</span>
+<span id="cb2-32"><a href="index.html#cb2-32" tabindex="-1"></a><span class="fu">library</span>(Hmsc)</span>
+<span id="cb2-33"><a href="index.html#cb2-33" tabindex="-1"></a><span class="fu">library</span>(corrplot)</span></code></pre></div>
 
 </div>
 </div>
@@ -2204,11 +2206,11 @@ color: #a52929;
 <li id="fn2"><p>University of Copenhagen, <a href="mailto:ostaizka.aizpurua@sund.ku.dk" class="email">ostaizka.aizpurua@sund.ku.dk</a><a href="#fnref2" class="footnote-back">↩︎</a></p></li>
 <li id="fn3"><p>University of Valencia, <a href="mailto:jal4@uv.es" class="email">jal4@uv.es</a><a href="#fnref3" class="footnote-back">↩︎</a></p></li>
 <li id="fn4"><p>Centre National de la Recherche Scientifique, <a href="mailto:faubret@gmail.com" class="email">faubret@gmail.com</a><a href="#fnref4" class="footnote-back">↩︎</a></p></li>
-<li id="fn5"><p>University of Valencia and Universidade do Porto, <a href="mailto:guillem.perez-lanuza@uv.es" class="email">guillem.perez-lanuza@uv.es</a><a href="#fnref5" class="footnote-back">↩︎</a></p></li>
-<li id="fn6"><p>, <a href="mailto:t.sarraude@gmail.com" class="email">t.sarraude@gmail.com</a><a href="#fnref6" class="footnote-back">↩︎</a></p></li>
-<li id="fn7"><p>, <a href="#fnref7" class="footnote-back">↩︎</a></p></li>
+<li id="fn5"><p>University of Valencia, <a href="mailto:guillem.perez-lanuza@uv.es" class="email">guillem.perez-lanuza@uv.es</a><a href="#fnref5" class="footnote-back">↩︎</a></p></li>
+<li id="fn6"><p>Centre National de la Recherche Scientifique, <a href="mailto:t.sarraude@gmail.com" class="email">t.sarraude@gmail.com</a><a href="#fnref6" class="footnote-back">↩︎</a></p></li>
+<li id="fn7"><p>University of Lund, <a href="mailto:nathalie.feiner@biol.lu.se" class="email">nathalie.feiner@biol.lu.se</a><a href="#fnref7" class="footnote-back">↩︎</a></p></li>
 <li id="fn8"><p>University of Lund, <a href="mailto:tobias.uller@biol.lu.se" class="email">tobias.uller@biol.lu.se</a><a href="#fnref8" class="footnote-back">↩︎</a></p></li>
-<li id="fn9"><p>University of Copenhagen, <a href="mailto:aoife.leonard@sund.ku.dk" class="email">aoife.leonard@sund.ku.dk</a><a href="#fnref9" class="footnote-back">↩︎</a></p></li>
+<li id="fn9"><p>Aarhus University, <a href="mailto:aoife.leonard@sund.ku.dk" class="email">aoife.leonard@sund.ku.dk</a><a href="#fnref9" class="footnote-back">↩︎</a></p></li>
 <li id="fn10"><p>University of Copenhagen, <a href="mailto:antton.alberdi@sund.ku.dk" class="email">antton.alberdi@sund.ku.dk</a><a href="#fnref10" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>

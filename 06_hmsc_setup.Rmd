@@ -59,12 +59,21 @@ XData <- sample_metadata %>%
                     column_to_rownames("EHI_number")
 
 
-# Genome trait data (not needed now, and it gives error in to.functions section)
-#TrData <- genome_gifts %>%
-                    #arrange(match(genome, colnames(YData))) %>%
-                    #column_to_rownames(var="genome") %>%
-                    #to.functions(.,GIFT_db) %>%
-                    #as.data.frame()
+# Genome trait data
+elements_table_hmsc <- genome_gifts_filt %>%
+    to.elements(., GIFT_db) %>%
+    as.data.frame()
+
+elements_table_hmsc<-rownames_to_column(elements_table_hmsc,var = "genome")
+
+TrData <- elements_table_hmsc %>%
+  filter(genome %in% selected_genomes2) %>% #subset genomes
+  arrange(match(genome, colnames(YData))) %>%
+  column_to_rownames(var="genome") %>%
+  to.functions(.,GIFT_db) %>%
+  as.data.frame()
+
+TrFormula=~B01+B02+B03+B04+B06+B07+B08+B09+B10+D01+D02+D03+D05+D06+D07+D08+D09+S01+S02+S03
 
 # Genome phylogeny
 PData <- genome_tree
@@ -89,6 +98,8 @@ model1 = Hmsc(Y=YData,
          XData = XData,
          XFormula = XFormula1,
          studyDesign = StudyDesign,
+         TrData = TrData,
+         TrFormula=TrFormula,
          phyloTree = PData,
          ranLevels = list("Sampling_point"=rL.sampling_point, "Transect"=rL.transect),
          distr = "normal",

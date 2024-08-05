@@ -30,6 +30,11 @@ mags-shared-across-transects
 community-composition
 taxonomy-overview
 stacked-barplot
+number-of-bacteria-phyla
+bacteria-phyla-in-aisa-transect
+bacteria-phyla-in-aran-transect
+bacteria-phyla-in-sentein-transect
+bacteria-phyla-in-tourmalet-transect
 phylum-relative-abundances
 taxonomy-boxplot
 family

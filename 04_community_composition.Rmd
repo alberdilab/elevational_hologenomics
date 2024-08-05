@@ -277,8 +277,8 @@ genus_summary %>%
     mutate(genus=factor(genus,levels=rev(genus_arrange[1:20]))) %>%
     filter(relabun > 0) %>%
     ggplot(aes(x=relabun, y=genus, group=genus, color=phylum)) +
-        scale_color_manual(values=phylum_colors[-c(3,4,6,8)]) +
+        scale_color_manual(values=phylum_colors) +
         geom_jitter(alpha=0.5) + 
         theme_minimal() + 
-        labs(y="Family", x="Relative abundance", color="Phylum")
+        labs(y="Genus", x="Relative abundance", color="Phylum")
 ```

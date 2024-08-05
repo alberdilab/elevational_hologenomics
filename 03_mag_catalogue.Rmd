@@ -209,7 +209,7 @@ function_ordination
 ## MAGs shared across transects
 
 ```{r upset_plot, message=FALSE, fig.height=8, fig.width=10, fig.fullwidth=TRUE}
-genome_counts_rel <- genome_counts_filt_filt %>%
+genome_counts_rel <- genome_counts_filt %>%
   mutate_at(vars(-genome),~./sum(.)) %>%
   column_to_rownames(., "genome")
 genome_counts_rel_pa=1*(genome_counts_rel>0)

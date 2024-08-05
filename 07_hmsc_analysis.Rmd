@@ -195,12 +195,18 @@ matrix <- toPlot %>%
                        high = "#b2b530")+
             theme_void()
 
-vtree <- genome_tree_subset %>%
+vtree_top <- genome_tree_subset %>%
+  force.ultrametric(.,method="extend") %>%
+  ggtree(layout = "rectangular") + 
+  layout_dendrogram() +  # Ensure correct layout
+  coord_flip()
+
+vtree_left <- genome_tree_subset %>%
   force.ultrametric(.,method="extend") %>%
   ggtree(.)
 
 #create composite figure
-grid.arrange(grobs = list(vtree,matrix,vtree),
+grid.arrange(grobs = list(vtree_top,matrix,vtree_left),
              layout_matrix = rbind(c(4,1,1,1,1,1,1,1,1,1,1,1),
                                    c(3,2,2,2,2,2,2,2,2,2,2,2),
                                    c(3,2,2,2,2,2,2,2,2,2,2,2),
@@ -416,7 +422,7 @@ all_elements %>%
   ggplot(aes(x=mean, y=fct_reorder(element_legend, mean), xmin=p1, xmax=p9, color=function_legend)) +
       geom_point() +
       geom_errorbar() +
-      xlim(c(-0.1,0.09)) +
+      xlim(c(-0.15,0.15)) +
       geom_vline(xintercept=0) +
       scale_color_manual(values = gift_colors$Color) +
       theme_minimal() +
@@ -427,8 +433,8 @@ all_elements %>%
 community_elements %>%
     bind_rows() %>%
     pivot_longer(-elevation, names_to = "trait", values_to = "value") %>%
-  filter(trait %in% positive$trait) %>%
-  mutate(trait=factor(trait, levels=positive$trait)) %>%
+    filter(trait %in% positive$trait) %>%
+    mutate(trait=factor(trait, levels=positive$trait)) %>%
     mutate(elevation=as.numeric(elevation)) %>%
     ggplot(aes(x=elevation, y=value)) +
           geom_smooth(method = lm, formula = y ~ x, se = TRUE) +
@@ -571,7 +577,6 @@ p2 %>%
 ```
 
 ```{r hmsc_community_function_predictions_model_1_2, warning=FALSE, comments="", message=FALSE,fig.height=10, fig.width=10, fig.fullwidth=TRUE}
-
 all_functions <- function_predictions %>%
   left_join(GIFT_db,by=join_by(trait==Code_function)) %>%
   mutate(trait=factor(trait)) %>%
@@ -587,7 +592,7 @@ all_functions %>%
   ggplot(aes(x=mean, y=fct_reorder(function_legend, mean), xmin=p1, xmax=p9, color=function_legend)) +
       geom_point() +
       geom_errorbar() +
-      xlim(c(-0.05,0.05)) +
+      xlim(c(-0.05,0.06)) +
       geom_vline(xintercept=0) +
       scale_color_manual(values = gift_colors$Color) +
       theme_minimal() +
@@ -742,7 +747,7 @@ all_domains %>%
   ggplot(aes(x=mean, y=fct_reorder(trait, mean), xmin=p1, xmax=p9, color=trait)) +
       geom_point() +
       geom_errorbar() +
-      xlim(c(-0.02,0.02)) +
+      xlim(c(-0.02,0.03)) +
       geom_vline(xintercept=0) +
       theme_minimal() +
       labs(x="Regression coefficient",y="Domain level") +
