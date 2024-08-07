@@ -52,6 +52,8 @@ library(knitr)
 library(tidyverse)
 library(devtools)
 library(tinytable)
+library(broom.mixed)
+library(rmarkdown)
 
 # For tree handling
 library(ape)
@@ -76,7 +78,6 @@ library(Rtsne)
 library(geiger)
 library(hilldiv2)
 library(distillR)
-library(broom.mixed)
 library(Hmsc)
 library(corrplot)
 ```

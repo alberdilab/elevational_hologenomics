@@ -205,7 +205,7 @@ richness_cor<-alpha_div %>%
 
 ```{r mixed_models_richness_df, echo=FALSE, message=FALSE, warning=FALSE,fig.height=4, fig.width=8, fig.fullwidth=TRUE}
 richness_cor %>%
-  tt()
+  paged_table()
 ```
 
 #### Neutral diversity
@@ -220,7 +220,7 @@ neutral_cor<-alpha_div %>%
 
 ```{r mixed_models_neutral_df, echo=FALSE, message=FALSE, warning=FALSE,fig.height=4, fig.width=8, fig.fullwidth=TRUE}
 neutral_cor %>%
-  tt()
+  paged_table()
 ```
 
 #### Phylogenetic diversity
@@ -235,7 +235,7 @@ phylo_cor<-alpha_div %>%
 
 ```{r mixed_models_phylo_df, echo=FALSE, message=FALSE, warning=FALSE,fig.height=4, fig.width=8, fig.fullwidth=TRUE}
 phylo_cor %>%
-  tt()
+  paged_table()
 ```
 
 #### Functional diversities
@@ -250,7 +250,7 @@ func_cor<-alpha_div %>%
 
 ```{r mixed_models_func_df, echo=FALSE, message=FALSE, warning=FALSE,fig.height=4, fig.width=8, fig.fullwidth=TRUE}
 func_cor %>%
-  tt()
+  paged_table()
 ```
 
 ## Beta diversity
