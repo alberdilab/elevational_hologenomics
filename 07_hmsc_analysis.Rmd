@@ -221,6 +221,13 @@ grid.arrange(grobs = list(vtree_top,matrix,vtree_left),
                                    c(3,2,2,2,2,2,2,2,2,2,2,2)))
 ```
 
+## Phylogenetic signal
+
+```{r phylogenetic_signal, warning=FALSE, comments="", message=FALSE}
+mpost <- convertToCodaObject(m)
+quantile(unlist(mpost$Rho), probs = c(.05,.5,.95))
+```
+
 ## Elevation predictions
 
 ```{r hmsc_elevation_predictions, warning=FALSE, comments="", message=FALSE}

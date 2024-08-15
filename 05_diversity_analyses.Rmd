@@ -272,3 +272,106 @@ beta_q1f <- genome_counts_filt_filt %>%
   #column_to_rownames(., "genome") %>%
   hillpair(., q = 1, dist = dist)
 ```
+```{r beta_div, comment="", message=FALSE, warning=FALSE, eval=FALSE}
+richness_beta <- genome_counts_filt %>%
+  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  mutate(Sampling_point=factor(Sampling_point)) %>% 
+  group_by(Sampling_point) %>% 
+  group_split() %>% 
+  map_dbl(., ~ .x %>%
+    select(genome, sample, counts) %>%
+    pivot_wider(names_from = sample, values_from = counts) %>%
+    column_to_rownames(var = "genome") %>%
+    tss() %>%
+    as.data.frame() %>%
+    hilldiss(data=., metric="S", q = 0)
+  )
+names(richness_beta)  <- unique(sample_metadata$Sampling_point) %>% sort()
+
+
+neutral_beta <- genome_counts_filt %>%
+  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  mutate(Sampling_point=factor(Sampling_point)) %>% 
+  group_by(Sampling_point) %>% 
+  group_split() %>% 
+  map_dbl(., ~ .x %>%
+    select(genome, sample, counts) %>%
+    pivot_wider(names_from = sample, values_from = counts) %>%
+    column_to_rownames(var = "genome") %>%
+    tss() %>%
+    as.data.frame() %>%
+    hilldiss(data=., metric="S", q = 1)
+  )
+names(neutral_beta)  <- unique(sample_metadata$Sampling_point) %>% sort()
+
+phylogenetic_beta <- genome_counts_filt %>%
+  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  mutate(Sampling_point=factor(Sampling_point)) %>% 
+  group_by(Sampling_point) %>% 
+  group_split() %>% 
+  map_dbl(., ~ .x %>%
+    select(genome, sample, counts) %>%
+    pivot_wider(names_from = sample, values_from = counts) %>%
+    column_to_rownames(var = "genome") %>%
+    tss() %>%
+    as.data.frame() %>%
+    hilldiss(data=., metric="S", q = 1, tree = genome_tree)
+  )
+names(phylogenetic_beta)  <- unique(sample_metadata$Sampling_point) %>% sort()
+
+
+genome_counts_filt_filt <- tibble::rownames_to_column(genome_counts_filt_filt, var = "genome")
+
+functional_beta <- genome_counts_filt_filt %>%
+  tibble::rownames_to_column(var = "genome") %>%
+  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+  mutate(Sampling_point=factor(Sampling_point)) %>% 
+  group_by(Sampling_point) %>% 
+  group_split() %>% 
+  map_dbl(., ~ .x %>%
+    select(genome, sample, counts) %>%
+    pivot_wider(names_from = sample, values_from = counts) %>%
+    column_to_rownames(var = "genome") %>%
+    tss() %>%
+    as.data.frame() %>%
+    hilldiss(data=., metric="S", q = 1, dist = dist)
+  )
+names(functional_beta)  <- unique(sample_metadata$Sampling_point) %>% sort()
+
+# Merge all metrics
+beta_div <- bind_rows(richness_beta,neutral_beta,phylogenetic_beta,functional_beta) %>%
+  t() %>% 
+  as.data.frame() %>% 
+  rownames_to_column(var="Sampling_point") %>% 
+  as_tibble() %>% 
+  rename("richness"=V1,"neutral"=V2,"phylogenetic"=V3,"functional"=V4)
+```
+
+```{r beta_div_boxplot, comment="", message=FALSE, warning=FALSE, fig.height=5, fig.width=10, fig.fullwidth=TRUE}
+beta_div %>%
+  pivot_longer(-Sampling_point, names_to = "metric", values_to = "value") %>%
+  left_join(sample_metadata %>% select(Transect,Sampling_point, Elevation) %>% unique, by = "Sampling_point") %>%
+  mutate(metric=factor(metric,levels=c("richness","neutral","phylogenetic","functional"))) %>%
+      ggplot(aes(y = value, x = Transect,group=Transect, fill=Transect)) +
+      geom_boxplot(outlier.shape = NA) +
+      geom_jitter(aes(color = Elevation), alpha = 0.5, size = 2) +
+      scale_color_viridis_c(name = "Elevation", option = "viridis") +
+      scale_fill_manual(name="Transect",
+          breaks=c("Aisa","Aran","Sentein","Tourmalet"),
+          labels=c("Aisa","Aran","Sentein","Tourmalet"),
+          values=c("#e5bd5b50", "#6b739850","#e2815a50", "#876b9650")) +
+      facet_wrap(. ~ metric, scales = "free", ncol=4) +
+      coord_cartesian(xlim = c(1, NA)) +
+      stat_compare_means(size=2) +
+      theme_classic() +
+      theme(
+        strip.background = element_blank(),
+        panel.grid.minor.x = element_line(size = .1, color = "grey"),
+        axis.text.x = element_text(angle = 45, hjust = 1)
+      ) + 
+  ylab("Beta diversity")
+```
