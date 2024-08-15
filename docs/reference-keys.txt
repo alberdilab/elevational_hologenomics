@@ -64,6 +64,7 @@ assess-chain-convergence
 hmsc-analysis
 load-data-2
 compute-variance-partitioning
+phylogenetic-signal
 elevation-predictions
 responses-to-elevation
 functional-predictions

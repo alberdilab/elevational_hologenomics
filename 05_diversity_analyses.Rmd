@@ -272,7 +272,7 @@ beta_q1f <- genome_counts_filt_filt %>%
   #column_to_rownames(., "genome") %>%
   hillpair(., q = 1, dist = dist)
 ```
-```{r beta_div, comment="", message=FALSE, warning=FALSE, eval=FALSE}
+```{r beta_div_transects, comment="", message=FALSE, warning=FALSE, eval=FALSE}
 richness_beta <- genome_counts_filt %>%
   pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
   left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
