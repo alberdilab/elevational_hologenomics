@@ -93,6 +93,27 @@ vertical_tree <-  varpart_tree +
 vertical_tree
 ```
 
+## Model fit
+
+```{r model_fit, warning=FALSE, comments="", message=FALSE, results=TRUE}
+MFCV <- evaluateModelFit(hM=m, predY=cv)
+
+mean(MFCV$R2, na.rm = TRUE)
+```
+
+```{r model_fit_1, warning=FALSE, comments="", message=FALSE, results=TRUE}
+genome_fit <- tibble(genome=m$spNames, r2 = MFCV[[2]])
+
+genome_counts_filt %>% 
+mutate_if(is.numeric, ~ . / sum(.)) %>% 
+left_join(genome_fit, by="genome") %>% 
+#filter(r2>0.5) %>% 
+select(-c(genome,r2)) %>% 
+colSums() %>%  
+hist()
+```
+
+
 ```{r hmsc_postestimates, warning=FALSE, comments="", message=FALSE}
 # Select desired support threshold
 support=0.9
