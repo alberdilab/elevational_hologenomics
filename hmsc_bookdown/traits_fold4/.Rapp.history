@@ -1,0 +1,3 @@
+load("/Users/dlz554/Desktop/PhD_project/Elevation_Hologenomics/Rmd/Elevation_Hologenomics_v2/Elevation_Hologenomics/elevational_hologenomics/hmsc_bookdown/traits_fold4/fit_model1_250_10.Rdata")
+view fit_model1_250_10
+view fit_model1_250_10.Rdata

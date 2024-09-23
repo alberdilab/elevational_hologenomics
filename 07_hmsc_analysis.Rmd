@@ -13,8 +13,6 @@ load("data/data.Rdata")
 # Select modelchain of interest
 load("hmsc_bookdown/fit_model1_250_10.Rdata")
 
-varpart=computeVariancePartitioning(m)
-
 # Compute variance partitioning
 varpart=computeVariancePartitioning(m)
 
@@ -22,7 +20,7 @@ varpart$vals %>%
    as.data.frame() %>%
    rownames_to_column(var="variable") %>%
    pivot_longer(!variable, names_to = "genome", values_to = "value") %>%
-   mutate(variable=factor(variable, levels=c("Elevation","Tree_cover", "Anthropization_cover", "logseqdepth","Random: Sampling_point", "Random: Transect"))) %>%
+   mutate(variable=factor(variable, levels=c("Elevation","I(Elevation^2)","logseqdepth","Transect","Random: Sampling_point"))) %>%
    group_by(variable) %>%
    summarise(mean=mean(value)*100,sd=sd(value)*100) %>%
    tt()
@@ -38,7 +36,7 @@ varpart_table <- varpart$vals %>%
    as.data.frame() %>%
    rownames_to_column(var="variable") %>%
    pivot_longer(!variable, names_to = "genome", values_to = "value") %>%
-   mutate(variable=factor(variable, levels=rev(c("Elevation","Tree_cover","Anthropization_cover", "logseqdepth","Random: Sampling_point", "Random: Transect")))) %>%
+   mutate(variable=factor(variable, levels=rev(c("Elevation","I(Elevation^2)","logseqdepth","Transect","Random: Sampling_point")))) %>%
    mutate(genome=factor(genome, levels=rev(varpart_tree$tip.label)))
 
 #Phylums
@@ -107,7 +105,7 @@ genome_fit <- tibble(genome=m$spNames, r2 = MFCV[[2]])
 genome_counts_filt %>% 
 mutate_if(is.numeric, ~ . / sum(.)) %>% 
 left_join(genome_fit, by="genome") %>% 
-#filter(r2>0.5) %>% 
+filter(r2>0.5) %>% 
 select(-c(genome,r2)) %>% 
 colSums() %>%  
 hist()
@@ -139,11 +137,13 @@ post_beta <- getPostEstimate(hM=m, parName="Beta")$support %>%
     pivot_wider(names_from = variable, values_from = value) %>%
     rename(intercept=2,
              Elevation=3,
-           Tree_cover=4,
-           Anthropization_cover=5,
-             logseqdepth=6
+           Elevation_2=4,
+           TransectAran=5,
+           TransectSentein=6,
+           TransectTourmalet=7,
+             logseqdepth=8
            ) %>%
-    select(genome,intercept,Elevation,Tree_cover,Anthropization_cover,logseqdepth) %>%
+    select(genome,intercept,Elevation,Elevation_2,TransectAran,TransectSentein,TransectTourmalet,logseqdepth) %>%
     column_to_rownames(var="genome")
 
 #Phylums
@@ -258,7 +258,7 @@ gradientlength = length(gradient)
 #Treatment-specific gradient predictions
 pred_elevation <- constructGradient(m,
                       focalVariable = "Elevation",
-                      non.focalVariables = list(logseqdepth=list(1),Tree_cover=list(1), Anthropization_cover=list(1)),
+                      non.focalVariables = list(logseqdepth=list(1)),
                       ngrid=gradientlength) %>%
                       predict(m, Gradient = ., expected = TRUE) %>%
                       do.call(rbind,.) %>%

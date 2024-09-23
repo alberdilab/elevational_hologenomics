@@ -2,13 +2,13 @@
 
 ## Load data
 
-```{r load_data}
+```{r load_data_2}
 load("data/data.Rdata")
 ```
 
 ## Subsetting
 
-```{r subsetting, warning=FALSE, comments="", message=FALSE}
+```{r subsetting_1, warning=FALSE, comments="", message=FALSE}
 # Subset by prevalence (present in more than 5 samples)
 selected_genomes1 <- genome_counts %>%
     filter(rowSums(across(starts_with("EHI")) != 0) >= 5) %>%
@@ -28,13 +28,13 @@ genome_metadata_subset <- genome_metadata %>%
     filter(genome %in% selected_genomes2)
 ```
 
-```{r hmsc_input, warning=FALSE, comments="", message=FALSE}
+```{r hmsc_input_1, warning=FALSE, comments="", message=FALSE}
 # Random effects data (study design)
 StudyDesign <- sample_metadata %>%
-                    select(EHI_number,Sampling_point,Transect, Elevation) %>%
+                    select(EHI_number,Sampling_point) %>%
                     mutate(Sampling_point = factor(Sampling_point)) %>%
-                    mutate(Transect = factor(Transect)) %>%
-                    mutate(Elevation = factor(Elevation)) %>%
+                    #mutate(Transect = factor(Transect)) %>%
+                    #mutate(Elevation = factor(Elevation)) %>%
                     column_to_rownames("EHI_number")
 
 # Genome count table (quantitative community data)
@@ -44,17 +44,19 @@ YData <- read_counts  %>%
                     mutate(across(where(is.numeric), ~ . / (genome_metadata_subset$length / 150) )) %>% #transform to genome counts
                     mutate(across(where(is.numeric), ~  log(.) )) %>% #log-transform
                     column_to_rownames("genome") %>%
-                    select(all_of(row.names(StudyDesign))) %>%  #filter only faecal samples
+                    select(all_of(row.names(StudyDesign))) %>%
                     as.data.frame() %>%
                     t() # transpose
 
 # Fixed effects data (explanatory variables)
 XData <- sample_metadata %>%
-                    select(EHI_number,Elevation,Tree_cover, Anthropization_cover) %>%
+                    select(EHI_number,Elevation,Transect) %>%
+                    mutate(Transect = factor(Transect)) %>%
                     mutate(logseqdepth=read_counts %>% #total log-sequencing depth
                         select(all_of(row.names(StudyDesign))) %>%
                         colSums() %>%
-                        log()
+                        log(),
+                        Elevation2 = Elevation^2  # Adding the quadratic effect of Elevation
                     ) %>%
                     column_to_rownames("EHI_number")
 
@@ -82,13 +84,12 @@ PData <- genome_tree
 ## Define formulas of the Hmsc model
 
 ```{r hmsc_formulas, warning=FALSE, comments="", message=FALSE}
-
 # Fixed effects formula
-XFormula1 = ~Elevation + Tree_cover + Anthropization_cover + logseqdepth
+XFormula1 = ~Elevation + I(Elevation^2) + Transect + logseqdepth
 
 # Study design
 rL.sampling_point = HmscRandomLevel(units = levels(StudyDesign$Sampling_point))
-rL.transect = HmscRandomLevel(units = levels(StudyDesign$Transect))
+#rL.transect = HmscRandomLevel(units = levels(StudyDesign$Transect))
 ```
 
 ## Define and Hmsc models
@@ -101,9 +102,20 @@ model1 = Hmsc(Y=YData,
          TrData = TrData,
          TrFormula=TrFormula,
          phyloTree = PData,
-         ranLevels = list("Sampling_point"=rL.sampling_point, "Transect"=rL.transect),
+         ranLevels = list("Sampling_point"=rL.sampling_point),
          distr = "normal",
          YScale = TRUE)
+
+#model2 = Hmsc(Y=YData,
+         #XData = XData,
+         #XFormula = XFormula2,
+         #studyDesign = StudyDesign,
+         #TrData = TrData,
+         #TrFormula=TrFormula,
+         #phyloTree = PData,
+         #ranLevels = list("Sampling_point"=rL.sampling_point),
+         #distr = "normal",
+         #YScale = TRUE)
 
 #Save list of models as an R object.
 model_list = list(model1=model1)
@@ -186,8 +198,28 @@ m = sampleMcmc(hM = model,
          nChains = nchains,
          nParallel = nchains)
 
-# Run model cross-validation
-partition <- createPartition(m, nfolds = 4)
+# Run model cross-validation, each fold will include the samples from the whole elevation gradient of each transect, randomly selected
+#partition <- createPartition(m, nfolds = 4)
+
+StudyDesign<-m$studyDesign
+
+partition<-numeric(length = nrow(StudyDesign))
+folds<-1:4
+n_sampling_points<-length(unique(StudyDesign$Sampling_point))
+
+set.seed(1)
+for(i in 1:n_sampling_points){
+  location_tmp<-which(StudyDesign$Sampling_point==unique(StudyDesign$Sampling_point)[i])
+  if(length(location_tmp)>4){
+    random_points<-sample(location_tmp,4)
+    partition[random_points]<-sample(folds,4)
+    remaining_points<-location_tmp[is.na(match(location_tmp, random_points))]
+    partition[remaining_points]<-sample(folds,length(remaining_points))
+  }else{
+    partition[location_tmp]<-sample(folds,length(location_tmp))
+  }
+}
+
 cv <- computePredictedValues(m, partition=partition, nChains = 4)         
          
 # Assess chain convergence
@@ -240,7 +272,7 @@ done
 
 #Or launch them one by one only the ones you want to launch
 sbatch hmsc/exe_model1_250_1.sh
-sbatch hmsc/exe_model1_250_10.sh
+sbatch hmsc/exe_model2_250_10.sh
 ```
 
 ## Assess chain convergence

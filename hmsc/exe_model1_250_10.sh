@@ -35,8 +35,28 @@ m = sampleMcmc(hM = model,
          nChains = nchains,
          nParallel = nchains)
 
-# Run model cross-validation
-partition <- createPartition(m, nfolds = 4)
+# Run model cross-validation, each fold will include the samples from the whole elevation gradient of each transect, randomly selected
+#partition <- createPartition(m, nfolds = 4)
+
+StudyDesign<-m$studyDesign
+
+partition<-numeric(length = nrow(StudyDesign))
+folds<-1:4
+n_sampling_points<-length(unique(StudyDesign$Sampling_point))
+
+set.seed(1)
+for(i in 1:n_sampling_points){
+  location_tmp<-which(StudyDesign$Sampling_point==unique(StudyDesign$Sampling_point)[i])
+  if(length(location_tmp)>4){
+    random_points<-sample(location_tmp,4)
+    partition[random_points]<-sample(folds,4)
+    remaining_points<-location_tmp[is.na(match(location_tmp, random_points))]
+    partition[remaining_points]<-sample(folds,length(remaining_points))
+  }else{
+    partition[location_tmp]<-sample(folds,length(location_tmp))
+  }
+}
+
 cv <- computePredictedValues(m, partition=partition, nChains = 4)         
          
 # Assess chain convergence
