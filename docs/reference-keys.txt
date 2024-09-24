@@ -70,8 +70,14 @@ elevation-predictions
 responses-to-elevation
 functional-predictions
 element-level
+positive-associated-functions-at-element-level
+negative-associated-functions-at-element-level
 gift-test-visualization
 functional-level
+positive-associated-functions-at-element-level-1
+negative-associated-functions-at-element-level-1
 gift-test-visualization-1
 domain-level
+positive-associated-functions-at-element-level-there-isnt
+negative-associated-functions-at-element-level-there-isnt
 gift-test-visualization-2
