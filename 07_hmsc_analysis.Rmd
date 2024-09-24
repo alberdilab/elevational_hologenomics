@@ -368,51 +368,32 @@ element_predictions <- map_dfc(community_elements, function(mat) {
       arrange(-positive_support)
 ```
 
+#### Positive associated functions at element level
+
 ```{r hmsc_elevation_function_element_significant, comment="", message=FALSE, warning=FALSE, eval=FALSE}
-# Positively associated
-p0<-positive_filtered<-element_predictions %>%
+unique_funct_db<- GIFT_db[c(2,4,5,6)] %>% 
+  distinct(Code_element, .keep_all = TRUE)
+
+element_predictions %>%
   filter(mean >0) %>%
   arrange(-positive_support) %>%
-  filter(positive_support>=0.9) 
-
-if (nrow(positive_filtered) > 0) {
-  positive_filtered %>%
-  tt() |>
-      style_tt(
-        i = which(element_predictions$positive_support < 0.9 & element_predictions$negative_support < 0.1),
-        background = "#E5D5B1") |>
-      style_tt(
-        i = which(element_predictions$negative_support > 0.9 & element_predictions$positive_support < 0.1),
-        background = "#B7BCCE")
-}
-
-
-#Negatively associated
-p1<-negative_filtered<-element_predictions %>%
-  filter(mean <0) %>%
-  arrange(-negative_support) %>%
-  filter(negative_support>=0.9) 
-
-if (nrow(negative_filtered) > 0) {
-  negative_filtered %>%
-  tt() |>
-      style_tt(
-        i = which(element_predictions$positive_support < 0.9 & element_predictions$negative_support < 0.1),
-        background = "#E5D5B1") |>
-      style_tt(
-        i = which(element_predictions$negative_support > 0.9 & element_predictions$positive_support < 0.1),
-        background = "#B7BCCE")
-}
+  filter(positive_support>=0.9) %>%
+  left_join(unique_funct_db, by = join_by(trait == Code_element))%>%
+  arrange(Domain,Function)%>%
+  paged_table()
 ```
 
-```{r hmsc_elevation_function_element_significant_table, warning=FALSE, comments="", message=FALSE}
-# Positively associated
-p0 %>%
-  tt()
+#### Negative associated functions at element level
 
-#Negatively associated
-p1%>%
-  tt()
+```{r hmsc_elevation_function_element_significant_1, comment="", message=FALSE, warning=FALSE, eval=FALSE}
+
+element_predictions %>%
+  filter(mean <0) %>%
+  arrange(-negative_support) %>%
+  filter(negative_support>=0.9) %>%
+  left_join(unique_funct_db, by = join_by(trait == Code_element))%>%
+  arrange(Domain,Function)%>%
+  paged_table()
 ```
 
 
@@ -567,45 +548,42 @@ function_predictions <- map_dfc(community_functions, function(mat) {
       arrange(-positive_support)
 ```
 
+#### Positive associated functions at element level
+
 ```{r hmsc_community_function_predictions_model_1, comment="", message=FALSE, warning=FALSE, eval=FALSE}
-# Positively associated
-p2<-function_predictions %>%
+function_predictions %>%
   filter(mean >0) %>%
   arrange(-positive_support) %>%
   filter(positive_support>=0.9) %>%
-  tt() |>
-      style_tt(
-        i = which(function_predictions$positive_support < 0.9 & function_predictions$negative_support < 0.1),
-        background = "#E5D5B1") |>
-      style_tt(
-        i = which(function_predictions$negative_support > 0.9 & function_predictions$positive_support < 0.1),
-        background = "#B7BCCE")
-
-# Negatively associated (there isn't)
-#function_predictions %>%
-  #filter(mean <0) %>%
-  #arrange(-negative_support) %>%
-  #filter(negative_support>=0.9) %>%
-  #tt() |>
-      #style_tt(
-        #i = which(function_predictions$positive_support < 0.9 & function_predictions$negative_support < 0.1),
-        #background = "#E5D5B1") |>
-      #style_tt(
-        #i = which(function_predictions$negative_support > 0.9 & function_predictions$positive_support < 0.1),
-        #background = "#B7BCCE")
-
+  paged_table()
 ```
 
-```{r hmsc_community_function_predictions_model_1_1, warning=FALSE, comments="", message=FALSE}
-# Positively associated
-p2 %>%
-  tt()
+#### Negative associated functions at element level
 
-#Negatively associated (there isn't)
+```{r hmsc_community_function_predictions_model_1_1, warning=FALSE, comments="", message=FALSE}
+function_predictions %>%
+  filter(mean <0) %>%
+  arrange(-negative_support) %>%
+  filter(negative_support>=0.9) %>%
+  paged_table()
 ```
 
 ```{r hmsc_community_function_predictions_model_1_2, warning=FALSE, comments="", message=FALSE,fig.height=10, fig.width=10, fig.fullwidth=TRUE}
-all_functions <- function_predictions %>%
+positive_func <- function_predictions %>%
+  filter(mean >0) %>%
+  arrange(mean) %>%
+  filter(positive_support>=0.9) %>%
+  dplyr::select(-negative_support) %>%
+  rename(support=positive_support)
+
+negative_func <- function_predictions %>%
+  filter(mean <0) %>%
+  arrange(mean) %>%
+  filter(negative_support>=0.9) %>%
+  dplyr::select(-positive_support) %>%
+  rename(support=negative_support)
+
+all_functions <- bind_rows(positive_func,negative_func) %>%
   left_join(GIFT_db,by=join_by(trait==Code_function)) %>%
   mutate(trait=factor(trait)) %>%
   mutate(function_legend=str_c(trait," - ",Function)) %>%
@@ -722,45 +700,23 @@ domain_predictions <- map_dfc(community_domains, function(mat) {
       arrange(-positive_support)
 ```
 
+#### Positive associated functions at element level (there isn't)
+
 ```{r hmsc_community_domain_predictions_model_1, comment="", message=FALSE, warning=FALSE, eval=FALSE}
-# Positively associated
-p3<-positive_filtered<-domain_predictions %>%
-  filter(mean >0) %>%
-  arrange(-positive_support) %>%
-  filter(positive_support>=0.9) 
+#domain_predictions %>%
+  #filter(mean >0) %>%
+  #arrange(-positive_support) %>%
+  #filter(positive_support>=0.9) %>%
+  #paged_table()
+```
+#### Negative associated functions at element level (there isn't)
 
-if (nrow(positive_filtered) > 0) {
-  positive_filtered %>%
-  tt() |>
-      style_tt(
-        i = which(domain_predictions$positive_support < 0.9 & domain_predictions$negative_support < 0.1),
-        background = "#E5D5B1") |>
-      style_tt(
-        i = which(domain_predictions$negative_support > 0.9 & domain_predictions$positive_support < 0.1),
-        background = "#B7BCCE")
-}
-
-# Negatively associated (there isn't)
+```{r hmsc_community_domain_predictions_model_1_1, warning=FALSE, comments="", message=FALSE}
 #domain_predictions %>%
   #filter(mean <0) %>%
   #arrange(-negative_support) %>%
   #filter(negative_support>=0.9) %>%
-  #tt() |>
-      #style_tt(
-        #i = which(domain_predictions$positive_support < 0.9 & domain_predictions$negative_support < 0.1),
-        #background = "#E5D5B1") |>
-      #style_tt(
-        #i = which(domain_predictions$negative_support > 0.9 & domain_predictions$positive_support < 0.1),
-        #background = "#B7BCCE")
-
-```
-
-```{r hmsc_community_domain_predictions_model_1_1, warning=FALSE, comments="", message=FALSE}
-# Positively associated
-p3 %>%
-  tt()
-
-# Negatively associated (there isn't)
+  #paged_table()
 ```
 
 ```{r hmsc_community_domain_predictions_model_1_2, warning=FALSE, comments="", message=FALSE,fig.height=10, fig.width=10, fig.fullwidth=TRUE}
