@@ -386,7 +386,6 @@ element_predictions %>%
 #### Negative associated functions at element level
 
 ```{r hmsc_elevation_function_element_significant_1, comment="", message=FALSE, warning=FALSE, eval=FALSE}
-
 element_predictions %>%
   filter(mean <0) %>%
   arrange(-negative_support) %>%
@@ -550,7 +549,7 @@ function_predictions <- map_dfc(community_functions, function(mat) {
 
 #### Positive associated functions at element level
 
-```{r hmsc_community_function_predictions_model_1, comment="", message=FALSE, warning=FALSE, eval=FALSE}
+```{r hmsc_community_function_predictions_model_1, comment="", message=FALSE, warning=FALSE}
 function_predictions %>%
   filter(mean >0) %>%
   arrange(-positive_support) %>%
