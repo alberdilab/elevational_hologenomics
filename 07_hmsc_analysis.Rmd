@@ -317,7 +317,7 @@ getPostEstimate(hM=m, parName="Beta")$support %>%
 
 ### Element level
 
-```{r hmsc_elevation_function_element, , comment="", message=FALSE, warning=FALSE, eval=FALSE}
+```{r hmsc_elevation_function_element, , comment="", message=FALSE, warning=FALSE}
 elements_table <- genome_gifts_filt %>%
     to.elements(., GIFT_db) %>%
     as.data.frame()
@@ -370,7 +370,7 @@ element_predictions <- map_dfc(community_elements, function(mat) {
 
 #### Positive associated functions at element level
 
-```{r hmsc_elevation_function_element_significant, comment="", message=FALSE, warning=FALSE, eval=FALSE}
+```{r hmsc_elevation_function_element_significant, comment="", message=FALSE, warning=FALSE}
 unique_funct_db<- GIFT_db[c(2,4,5,6)] %>% 
   distinct(Code_element, .keep_all = TRUE)
 
@@ -385,7 +385,7 @@ element_predictions %>%
 
 #### Negative associated functions at element level
 
-```{r hmsc_elevation_function_element_significant_1, comment="", message=FALSE, warning=FALSE, eval=FALSE}
+```{r hmsc_elevation_function_element_significant_1, comment="", message=FALSE, warning=FALSE}
 element_predictions %>%
   filter(mean <0) %>%
   arrange(-negative_support) %>%
