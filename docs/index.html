@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>AlberdiLab | Martin-Bideguren et al. 2024</title>
   <meta name="description" content="&lt;p&gt;Data analysis code for the study on the recovery of metagenome‑assembled genomes and derived microbial communities from lizard faecal samples.&lt;/p&gt;" />
-  <meta name="generator" content="bookdown 0.40 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.41 and GitBook 2.6.7" />
 
   <meta property="og:title" content="AlberdiLab | Martin-Bideguren et al. 2024" />
   <meta property="og:type" content="book" />
@@ -3359,7 +3359,14 @@ color: #a52929;
 <li class="chapter" data-level="7.1.1" data-path="diversity-analyses.html"><a href="diversity-analyses.html#regression-plots"><i class="fa fa-check"></i><b>7.1.1</b> Regression plots</a></li>
 <li class="chapter" data-level="7.1.2" data-path="diversity-analyses.html"><a href="diversity-analyses.html#mixed-models"><i class="fa fa-check"></i><b>7.1.2</b> Mixed models</a></li>
 </ul></li>
-<li class="chapter" data-level="7.2" data-path="diversity-analyses.html"><a href="diversity-analyses.html#beta-diversity"><i class="fa fa-check"></i><b>7.2</b> Beta diversity</a></li>
+<li class="chapter" data-level="7.2" data-path="diversity-analyses.html"><a href="diversity-analyses.html#beta-diversity"><i class="fa fa-check"></i><b>7.2</b> Beta diversity</a>
+<ul>
+<li class="chapter" data-level="7.2.1" data-path="diversity-analyses.html"><a href="diversity-analyses.html#beta-diversity-per-individual"><i class="fa fa-check"></i><b>7.2.1</b> Beta diversity per individual</a></li>
+<li class="chapter" data-level="7.2.2" data-path="diversity-analyses.html"><a href="diversity-analyses.html#beta-diversity-per-population"><i class="fa fa-check"></i><b>7.2.2</b> Beta diversity per population</a></li>
+<li class="chapter" data-level="7.2.3" data-path="diversity-analyses.html"><a href="diversity-analyses.html#beta-diversity-per-transect-calculated-from-individuals"><i class="fa fa-check"></i><b>7.2.3</b> Beta diversity per transect (calculated from individuals)</a></li>
+<li class="chapter" data-level="7.2.4" data-path="diversity-analyses.html"><a href="diversity-analyses.html#beta-diversity-per-transect-calculated-from-elevation-chunks"><i class="fa fa-check"></i><b>7.2.4</b> Beta diversity per transect (calculated from elevation chunks)</a></li>
+<li class="chapter" data-level="7.2.5" data-path="diversity-analyses.html"><a href="diversity-analyses.html#beta-diversity-per-transect-calculated-from-population"><i class="fa fa-check"></i><b>7.2.5</b> Beta diversity per transect (calculated from population)</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="8" data-path="hmsc-set-up.html"><a href="hmsc-set-up.html"><i class="fa fa-check"></i><b>8</b> HMSC set-up</a>
 <ul>
@@ -3415,7 +3422,7 @@ color: #a52929;
 <h1 class="title">AlberdiLab | Martin-Bideguren et al. 2024</h1>
 <h2 class="subtitle"><em>Study title to be added</em></h2>
 <p class="author"><em>Garazi Martin-Bideguren<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>, Ostaizka Aizpurua<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>, Javier Abalos<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>, Fabien Aubret<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>, Guillem Pérez i de Lanuza<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>, Tom Sarraude<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a>, Nathalie Feiner<a href="#fn7" class="footnote-ref" id="fnref7"><sup>7</sup></a>, Tobias Uller<a href="#fn8" class="footnote-ref" id="fnref8"><sup>8</sup></a>, Aoife Leonard<a href="#fn9" class="footnote-ref" id="fnref9"><sup>9</sup></a> and Antton Alberdi<a href="#fn10" class="footnote-ref" id="fnref10"><sup>10</sup></a></em></p>
-<p class="date"><em>Last update: 2024-09-24</em></p>
+<p class="date"><em>Last update: 2024-12-07</em></p>
 </div>
 <div id="introduction" class="section level1 hasAnchor" number="1">
 <h1><span class="header-section-number">Chapter 1</span> Introduction<a href="index.html#introduction" class="anchor-section" aria-label="Anchor link to header"></a></h1>
@@ -3459,16 +3466,17 @@ color: #a52929;
 <span id="cb2-22"><a href="index.html#cb2-22" tabindex="-1"></a><span class="fu">library</span>(ggtree)</span>
 <span id="cb2-23"><a href="index.html#cb2-23" tabindex="-1"></a><span class="fu">library</span>(ggh4x)</span>
 <span id="cb2-24"><a href="index.html#cb2-24" tabindex="-1"></a><span class="fu">library</span>(UpSetR)</span>
-<span id="cb2-25"><a href="index.html#cb2-25" tabindex="-1"></a></span>
-<span id="cb2-26"><a href="index.html#cb2-26" tabindex="-1"></a><span class="co"># For statistics</span></span>
-<span id="cb2-27"><a href="index.html#cb2-27" tabindex="-1"></a><span class="fu">library</span>(spaa)</span>
-<span id="cb2-28"><a href="index.html#cb2-28" tabindex="-1"></a><span class="fu">library</span>(vegan)</span>
-<span id="cb2-29"><a href="index.html#cb2-29" tabindex="-1"></a><span class="fu">library</span>(Rtsne)</span>
-<span id="cb2-30"><a href="index.html#cb2-30" tabindex="-1"></a><span class="fu">library</span>(geiger)</span>
-<span id="cb2-31"><a href="index.html#cb2-31" tabindex="-1"></a><span class="fu">library</span>(hilldiv2)</span>
-<span id="cb2-32"><a href="index.html#cb2-32" tabindex="-1"></a><span class="fu">library</span>(distillR)</span>
-<span id="cb2-33"><a href="index.html#cb2-33" tabindex="-1"></a><span class="fu">library</span>(Hmsc)</span>
-<span id="cb2-34"><a href="index.html#cb2-34" tabindex="-1"></a><span class="fu">library</span>(corrplot)</span></code></pre></div>
+<span id="cb2-25"><a href="index.html#cb2-25" tabindex="-1"></a><span class="fu">library</span>(mapproj)</span>
+<span id="cb2-26"><a href="index.html#cb2-26" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="index.html#cb2-27" tabindex="-1"></a><span class="co"># For statistics</span></span>
+<span id="cb2-28"><a href="index.html#cb2-28" tabindex="-1"></a><span class="fu">library</span>(spaa)</span>
+<span id="cb2-29"><a href="index.html#cb2-29" tabindex="-1"></a><span class="fu">library</span>(vegan)</span>
+<span id="cb2-30"><a href="index.html#cb2-30" tabindex="-1"></a><span class="fu">library</span>(Rtsne)</span>
+<span id="cb2-31"><a href="index.html#cb2-31" tabindex="-1"></a><span class="fu">library</span>(geiger)</span>
+<span id="cb2-32"><a href="index.html#cb2-32" tabindex="-1"></a><span class="fu">library</span>(hilldiv2)</span>
+<span id="cb2-33"><a href="index.html#cb2-33" tabindex="-1"></a><span class="fu">library</span>(distillR)</span>
+<span id="cb2-34"><a href="index.html#cb2-34" tabindex="-1"></a><span class="fu">library</span>(Hmsc)</span>
+<span id="cb2-35"><a href="index.html#cb2-35" tabindex="-1"></a><span class="fu">library</span>(corrplot)</span></code></pre></div>
 
 </div>
 </div>

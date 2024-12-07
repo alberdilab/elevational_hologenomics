@@ -32,11 +32,11 @@ ggplot(genome_counts_filt_met, aes(x=interaction_var,y=count,fill=phylum, group=
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           axis.line = element_line(linewidth = 0.5, linetype = "solid", colour = "black"),
-          legend.position = "top",
+          legend.position = "none",
     legend.title = element_blank(),
-    legend.text = element_text(size=7))+
-    scale_x_discrete(labels = function(x) gsub(".*\\.", "", x)) +
-    facet_wrap(~Transect, scales = "free", labeller = as_labeller(function(label) gsub(".*\\.", "", label))) #only show elevation label
+    legend.text = element_text(size=7)) +
+    facet_nested(.~Transect+Elevation, scales = "free")
+  
 ```
 
 #### Number of bacteria phyla
