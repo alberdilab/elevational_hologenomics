@@ -308,11 +308,11 @@ beta_q0n_nmds %>%
                 guides(color=guide_legend(title="Elevation"))
 ```
 
-```{r beta_div_richness_permutest, echo=TRUE, results = FALSE}
+```{r beta_div_richness_permutest, echo=TRUE, results = TRUE}
 betadisper(beta_q0n$S, sample_metadata$Transect) %>% permutest(., pairwise=TRUE) 
 ```
 
-```{r beta_div_richness_adonis, echo=TRUE, results = FALSE}
+```{r beta_div_richness_adonis, echo=TRUE, results = TRUE}
 adonis2(beta_q0n$S ~ Elevation+Transect+Sampling_point, 
         data = sample_metadata %>% arrange(match(sample,labels(beta_q0n$S))), 
         permutations = 999,
@@ -350,11 +350,11 @@ beta_q1n_nmds %>%
                 guides(color=guide_legend(title="Elevation"))
 ```
 
-```{r beta_div_neutral_permutest, echo=TRUE, results = FALSE}
+```{r beta_div_neutral_permutest, echo=TRUE, results = TRUE}
 betadisper(beta_q1n$S, sample_metadata$Transect) %>% permutest(., pairwise=TRUE) 
 ```
 
-```{r beta_div_neutral_adonis, echo=TRUE, results = FALSE}
+```{r beta_div_neutral_adonis, echo=TRUE, results = TRUE}
 adonis2(beta_q1n$S ~ Elevation*Transect+Sampling_point, 
         data = sample_metadata %>% arrange(match(sample,labels(beta_q1n$S))), 
         permutations = 999,
@@ -391,11 +391,11 @@ beta_q1p_nmds %>%
                 guides(color=guide_legend(title="Elevation"))
 ```
 
-```{r beta_div_phylo_permutest, echo=TRUE, results = FALSE}
+```{r beta_div_phylo_permutest, echo=TRUE, results = TRUE}
 betadisper(beta_q1p$S, sample_metadata$Transect) %>% permutest(., pairwise=TRUE) 
 ```
 
-```{r beta_div_phylo_adonis, echo=TRUE, results = FALSE}
+```{r beta_div_phylo_adonis, echo=TRUE, results = TRUE}
 adonis2(beta_q1p$S ~ Elevation+Transect+Sampling_point, 
         data = sample_metadata %>% arrange(match(sample,labels(beta_q1p$S))), 
         permutations = 999,
@@ -434,11 +434,11 @@ beta_q1f_nmds %>%
                 guides(color=guide_legend(title="Elevation"))
 ```
 
-```{r beta_div_func_permutest, echo=TRUE, results = FALSE}
+```{r beta_div_func_permutest, echo=TRUE, results = TRUE}
 betadisper(beta_q1f$S, sample_metadata$Transect) %>% permutest(., pairwise=TRUE) 
 ```
 
-```{r beta_div_func_adonis, echo=TRUE, results = FALSE}
+```{r beta_div_func_adonis, echo=TRUE, results = TRUE}
 adonis2(beta_q1f$S ~ Elevation+Transect+Sampling_point, 
         data = sample_metadata %>% arrange(match(sample,labels(beta_q1f$S))), 
         permutations = 999,
@@ -554,7 +554,7 @@ beta_div %>%
 
 ```
 
-```{r beta_div_boxplot_1, comment="", message=FALSE, warning=FALSE, fig.height=5, fig.width=10, fig.fullwidth=TRUE}
+```{r beta_div_boxplot_1, comment="", results=FALSE, message=FALSE, warning=FALSE, fig.height=5, fig.width=10, fig.fullwidth=TRUE}
 bxp1<-beta_div %>%
   pivot_longer(-Sampling_point, names_to = "metric", values_to = "value") %>%
   left_join(sample_metadata %>% select(Transect,Sampling_point, Elevation) %>% unique, by = "Sampling_point") %>%
@@ -608,7 +608,7 @@ identical(sort(colnames(Aisa_counts)), sort(as.character(rownames(Aisa_transect)
 Aisa_counts_func <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(Aisa_transect))]
 ```
 
-```{r aisa_samples_1, echo=FALSE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
+```{r aisa_samples_1, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
 nrow(Aisa_transect)
 ```
 
@@ -657,7 +657,7 @@ adonis2(beta_div_func_aisa$S ~ Elevation+Sampling_point,
 
 #### Aran transect
 
-```{r aran_samples, echo=FALSE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
+```{r aran_samples, echo=FALSE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE}
 Aran_transect<-sample_metadata %>%
     filter(Transect=="Aran")%>%
     column_to_rownames("EHI_number")
@@ -680,7 +680,7 @@ beta_div_neutral_aran<-hillpair(data=Aran_counts, q=1)
 beta_div_phylo_aran<-hillpair(data=Aran_counts, q=1, tree=genome_tree)
 beta_div_func_aran<-hillpair(data=Aran_counts_func, q=1, dist=dist)
 ```
-```{r beta_div_aran_reg, echo=TRUE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
+```{r beta_div_aran_reg, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
 adonis2(beta_div_richness_aran$S ~ Elevation+Sampling_point, 
         data = Aran_transect %>% arrange(match(sample,labels(beta_div_richness_aran$S))), 
         permutations = 999,
@@ -689,7 +689,7 @@ adonis2(beta_div_richness_aran$S ~ Elevation+Sampling_point,
         tt()
 ```
 
-```{r beta_div_aran_reg_1, echo=TRUE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
+```{r beta_div_aran_reg_1, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
 adonis2(beta_div_neutral_aran$S ~ Elevation+Sampling_point, 
         data = Aran_transect %>% arrange(match(sample,labels(beta_div_neutral_aran$S))), 
         permutations = 999,
@@ -698,7 +698,7 @@ adonis2(beta_div_neutral_aran$S ~ Elevation+Sampling_point,
         tt()
 ```
 
-```{r beta_div_aran_reg_2,echo=TRUE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
+```{r beta_div_aran_reg_2,echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
 adonis2(beta_div_phylo_aran$S ~ Elevation+Sampling_point, 
         data = Aran_transect %>% arrange(match(sample,labels(beta_div_phylo_aran$S))), 
         permutations = 999,
@@ -707,7 +707,7 @@ adonis2(beta_div_phylo_aran$S ~ Elevation+Sampling_point,
         tt()
 ```
 
-```{r beta_div_aran_reg_3, echo=TRUE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
+```{r beta_div_aran_reg_3, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
 adonis2(beta_div_func_aran$S ~ Elevation+Sampling_point, 
         data = Aran_transect %>% arrange(match(sample,labels(beta_div_func_aran$S))), 
         permutations = 999,
@@ -719,7 +719,7 @@ adonis2(beta_div_func_aran$S ~ Elevation+Sampling_point,
 
 #### Sentein transect
 
-```{r sentein_samples, echo=FALSE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
+```{r sentein_samples, echo=FALSE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE}
 sentein_transect<-sample_metadata %>%
     filter(Transect=="Sentein")%>%
     column_to_rownames("EHI_number")
@@ -733,7 +733,7 @@ sentein_counts_func <- temp_genome_counts_func[, which(colnames(temp_genome_coun
 
 ```
 
-```{r sentein_samples_1, echo=FALSE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
+```{r sentein_samples_1, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
 nrow(sentein_transect)
 ```
 
@@ -744,7 +744,7 @@ beta_div_phylo_sentein<-hillpair(data=sentein_counts, q=1, tree=genome_tree)
 beta_div_func_sentein<-hillpair(data=sentein_counts_func, q=1, dist=dist)
 ```
 
-```{r beta_div_sentein_reg, echo=TRUE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
+```{r beta_div_sentein_reg, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
 adonis2(beta_div_richness_sentein$S ~ Elevation+Sampling_point, 
         data = sentein_transect %>% arrange(match(sample,labels(beta_div_richness_sentein$S))), 
         permutations = 999,
@@ -753,7 +753,7 @@ adonis2(beta_div_richness_sentein$S ~ Elevation+Sampling_point,
         tt()
 ```
 
-```{r beta_div_sentein_reg_1, echo=TRUE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
+```{r beta_div_sentein_reg_1, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
 adonis2(beta_div_neutral_sentein$S ~ Elevation+Sampling_point, 
         data = sentein_transect %>% arrange(match(sample,labels(beta_div_neutral_sentein$S))), 
         permutations = 999,
@@ -762,7 +762,7 @@ adonis2(beta_div_neutral_sentein$S ~ Elevation+Sampling_point,
         tt()
 ```
 
-```{r beta_div_sentein_reg_2, echo=TRUE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
+```{r beta_div_sentein_reg_2, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
 adonis2(beta_div_phylo_sentein$S ~ Elevation+Sampling_point, 
         data = sentein_transect %>% arrange(match(sample,labels(beta_div_phylo_sentein$S))), 
         permutations = 999,
@@ -771,7 +771,7 @@ adonis2(beta_div_phylo_sentein$S ~ Elevation+Sampling_point,
         tt()
 ```
 
-```{r beta_div_sentein_reg_3, echo=TRUE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
+```{r beta_div_sentein_reg_3, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
 adonis2(beta_div_func_sentein$S ~ Elevation+Sampling_point, 
         data = sentein_transect %>% arrange(match(sample,labels(beta_div_func_sentein$S))), 
         permutations = 999,
@@ -782,7 +782,7 @@ adonis2(beta_div_func_sentein$S ~ Elevation+Sampling_point,
 
 #### Tourmalet transect
 
-```{r tourmalet_samples, echo=FALSE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
+```{r tourmalet_samples, echo=FALSE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE}
 tourmalet_transect<-sample_metadata %>%
     filter(Transect=="Tourmalet")%>%
     column_to_rownames("EHI_number")
@@ -796,7 +796,7 @@ tourmalet_counts_func <- temp_genome_counts_func[, which(colnames(temp_genome_co
 
 ```
 
-```{r tourmalet_samples_1, echo=FALSE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
+```{r tourmalet_samples_1, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
 nrow(tourmalet_transect)
 ```
 
@@ -807,7 +807,7 @@ beta_div_phylo_tourmalet<-hillpair(data=tourmalet_counts, q=1, tree=genome_tree)
 beta_div_func_tourmalet<-hillpair(data=tourmalet_counts_func, q=1, dist=dist)
 ```
 
-```{r beta_div_tourmalet_reg, echo=TRUE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
+```{r beta_div_tourmalet_reg, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
 adonis2(beta_div_richness_tourmalet$S ~ Elevation+Sampling_point, 
         data = tourmalet_transect %>% arrange(match(sample,labels(beta_div_richness_tourmalet$S))), 
         permutations = 999,
@@ -816,7 +816,7 @@ adonis2(beta_div_richness_tourmalet$S ~ Elevation+Sampling_point,
         tt()
 ```
 
-```{r beta_div_tourmalet_reg_1, echo=TRUE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
+```{r beta_div_tourmalet_reg_1, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
 adonis2(beta_div_neutral_tourmalet$S ~ Elevation+Sampling_point, 
         data = tourmalet_transect %>% arrange(match(sample,labels(beta_div_neutral_tourmalet$S))), 
         permutations = 999,
@@ -825,7 +825,7 @@ adonis2(beta_div_neutral_tourmalet$S ~ Elevation+Sampling_point,
         tt()
 ```
 
-```{r beta_div_tourmalet_reg_2, echo=TRUE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
+```{r beta_div_tourmalet_reg_2, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
 adonis2(beta_div_phylo_tourmalet$S ~ Elevation+Sampling_point, 
         data = tourmalet_transect %>% arrange(match(sample,labels(beta_div_phylo_tourmalet$S))), 
         permutations = 999,
@@ -834,7 +834,7 @@ adonis2(beta_div_phylo_tourmalet$S ~ Elevation+Sampling_point,
         tt()
 ```
 
-```{r beta_div_tourmalet_reg_3, echo=TRUE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
+```{r beta_div_tourmalet_reg_3, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
 adonis2(beta_div_func_tourmalet$S ~ Elevation+Sampling_point, 
         data = tourmalet_transect %>% arrange(match(sample,labels(beta_div_func_tourmalet$S))), 
         permutations = 999,
@@ -882,11 +882,19 @@ beta_div_phylo_aisa_a<-hillpair(data=Aisa_counts_A, q=1, tree=genome_tree)
 beta_div_func_aisa_a<-hillpair(data=Aisa_counts_func_A, q=1, dist=dist)
 ```
 
-```{r aisa_transect_pairwise_A, eval=FALSE, results=TRUE}
-pairwise.adonis(beta_div_richness_aisa_a$S, Aisa_transect_A$Elevation, perm = 999)
-pairwise.adonis(beta_div_neutral_aisa_a$S, Aisa_transect_A$Elevation, perm = 999)
-pairwise.adonis(beta_div_phylo_aisa_a$S, Aisa_transect_A$Elevation, perm = 999)
-pairwise.adonis(beta_div_func_aisa_a$S, Aisa_transect_A$Elevation, perm = 999)
+```{r aisa_transect_pairwise_A, eval=TRUE, results=TRUE}
+pairwise_richness<-pairwise.adonis(beta_div_richness_aisa_a$S, Aisa_transect_A$Elevation, perm = 999)
+pairwise_richness%>%
+  tt()
+pairwise_neutral<-pairwise.adonis(beta_div_neutral_aisa_a$S, Aisa_transect_A$Elevation, perm = 999)
+pairwise_neutral%>%
+  tt()
+pairwise_phylo<-pairwise.adonis(beta_div_phylo_aisa_a$S, Aisa_transect_A$Elevation, perm = 999)
+pairwise_phylo%>%
+  tt()
+pairwise_function<-pairwise.adonis(beta_div_func_aisa_a$S, Aisa_transect_A$Elevation, perm = 999)
+pairwise_function%>%
+  tt()
 ```
 
 ```{r aisa_transect_data_B, eval=FALSE}
@@ -905,11 +913,19 @@ beta_div_phylo_aisa_b<-hillpair(data=Aisa_counts_B, q=1, tree=genome_tree)
 beta_div_func_aisa_b<-hillpair(data=Aisa_counts_func_B, q=1, dist=dist)
 ```
 
-```{r aisa_transect_pairwise_B, eval=FALSE, results=TRUE}
-pairwise.adonis(beta_div_richness_aisa_b$S, Aisa_transect_B$Elevation, perm = 999)
-pairwise.adonis(beta_div_neutral_aisa_b$S, Aisa_transect_B$Elevation, perm = 999)
-pairwise.adonis(beta_div_phylo_aisa_b$S, Aisa_transect_B$Elevation, perm = 999)
-pairwise.adonis(beta_div_func_aisa_b$S, Aisa_transect_B$Elevation, perm = 999)
+```{r aisa_transect_pairwise_B, eval=TRUE, results=TRUE}
+pairwise_richness<-pairwise.adonis(beta_div_richness_aisa_b$S, Aisa_transect_B$Elevation, perm = 999)
+pairwise_richness%>%
+  tt()
+pairwise_neutral<-pairwise.adonis(beta_div_neutral_aisa_b$S, Aisa_transect_B$Elevation, perm = 999)
+pairwise_neutral%>%
+  tt()
+pairwise_phylo<-pairwise.adonis(beta_div_phylo_aisa_b$S, Aisa_transect_B$Elevation, perm = 999)
+pairwise_phylo%>%
+  tt()
+pairwise_function<-pairwise.adonis(beta_div_func_aisa_b$S, Aisa_transect_B$Elevation, perm = 999)
+pairwise_function%>%
+  tt()
 ```
 
 ```{r aisa_transect_data_C, eval=FALSE}
@@ -928,11 +944,19 @@ beta_div_phylo_aisa_c<-hillpair(data=Aisa_counts_C, q=1, tree=genome_tree)
 beta_div_func_aisa_c<-hillpair(data=Aisa_counts_func_C, q=1, dist=dist)
 ```
 
-```{r aisa_transect_pairwise_C, eval=FALSE, results=TRUE}
-pairwise.adonis(beta_div_richness_aisa_c$S, Aisa_transect_C$Elevation, perm = 999)
-pairwise.adonis(beta_div_neutral_aisa_c$S, Aisa_transect_C$Elevation, perm = 999)
-pairwise.adonis(beta_div_phylo_aisa_c$S, Aisa_transect_C$Elevation, perm = 999)
-pairwise.adonis(beta_div_func_aisa_c$S, Aisa_transect_C$Elevation, perm = 999)
+```{r aisa_transect_pairwise_C, eval=TRUE, results=TRUE}
+pairwise_richness<-pairwise.adonis(beta_div_richness_aisa_c$S, Aisa_transect_C$Elevation, perm = 999)
+pairwise_richness%>%
+  tt()
+pairwise_neutral<-pairwise.adonis(beta_div_neutral_aisa_c$S, Aisa_transect_C$Elevation, perm = 999)
+pairwise_neutral%>%
+  tt()
+pairwise_phylo<-pairwise.adonis(beta_div_phylo_aisa_c$S, Aisa_transect_C$Elevation, perm = 999)
+pairwise_phylo%>%
+  tt()
+pairwise_function<-pairwise.adonis(beta_div_func_aisa_c$S, Aisa_transect_C$Elevation, perm = 999)
+pairwise_function%>%
+  tt()
 ```
 
 #### Aran
@@ -953,11 +977,19 @@ beta_div_phylo_aran_a<-hillpair(data=Aran_counts_A, q=1, tree=genome_tree)
 beta_div_func_aran_a<-hillpair(data=Aran_counts_func_A, q=1, dist=dist)
 ```
 
-```{r aran_transect_pairwise_A, eval=FALSE, results=TRUE}
-pairwise.adonis(beta_div_richness_aran_a$S, Aran_transect_A$Elevation, perm = 999)
-pairwise.adonis(beta_div_neutral_aran_a$S, Aran_transect_A$Elevation, perm = 999)
-pairwise.adonis(beta_div_phylo_aran_a$S, Aran_transect_A$Elevation, perm = 999)
-pairwise.adonis(beta_div_func_aran_a$S, Aran_transect_A$Elevation, perm = 999)
+```{r aran_transect_pairwise_A, eval=TRUE, results=TRUE}
+pairwise_richness<-pairwise.adonis(beta_div_richness_aran_a$S, Aran_transect_A$Elevation, perm = 999)
+pairwise_richness%>%
+  tt()
+pairwise_neutral<-pairwise.adonis(beta_div_neutral_aran_a$S, Aran_transect_A$Elevation, perm = 999)
+pairwise_neutral%>%
+  tt()
+pairwise_phylo<-pairwise.adonis(beta_div_phylo_aran_a$S, Aran_transect_A$Elevation, perm = 999)
+pairwise_phylo%>%
+  tt()
+pairwise_function<-pairwise.adonis(beta_div_func_aran_a$S, Aran_transect_A$Elevation, perm = 999)
+pairwise_function%>%
+  tt()
 ```
 
 ```{r aran_transect_data_B, eval=FALSE}
@@ -976,11 +1008,19 @@ beta_div_phylo_aran_b<-hillpair(data=Aran_counts_B, q=1, tree=genome_tree)
 beta_div_func_aran_b<-hillpair(data=Aran_counts_func_B, q=1, dist=dist)
 ```
 
-```{r aran_transect_pairwise_B, eval=FALSE, results=TRUE}
-pairwise.adonis(beta_div_richness_aran_b$S, Aran_transect_B$Elevation, perm = 999)
-pairwise.adonis(beta_div_neutral_aran_b$S, Aran_transect_B$Elevation, perm = 999)
-pairwise.adonis(beta_div_phylo_aran_b$S, Aran_transect_B$Elevation, perm = 999)
-pairwise.adonis(beta_div_func_aran_b$S, Aran_transect_B$Elevation, perm = 999)
+```{r aran_transect_pairwise_B, eval=TRUE, results=TRUE}
+pairwise_richness<-pairwise.adonis(beta_div_richness_aran_b$S, Aran_transect_B$Elevation, perm = 999)
+pairwise_richness%>%
+  tt()
+pairwise_neutral<-pairwise.adonis(beta_div_neutral_aran_b$S, Aran_transect_B$Elevation, perm = 999)
+pairwise_neutral%>%
+  tt()
+pairwise_phylo<-pairwise.adonis(beta_div_phylo_aran_b$S, Aran_transect_B$Elevation, perm = 999)
+pairwise_phylo%>%
+  tt()
+pairwise_function<-pairwise.adonis(beta_div_func_aran_b$S, Aran_transect_B$Elevation, perm = 999)
+pairwise_function%>%
+  tt()
 ```
 
 ```{r aran_transect_data_C, eval=FALSE}
@@ -999,11 +1039,19 @@ beta_div_phylo_aran_c<-hillpair(data=Aran_counts_C, q=1, tree=genome_tree)
 beta_div_func_aran_c<-hillpair(data=Aran_counts_func_C, q=1, dist=dist)
 ```
 
-```{r aran_transect_pairwise_C, eval=FALSE, results=TRUE}
-pairwise.adonis(beta_div_richness_aran_c$S, Aran_transect_C$Elevation, perm = 999)
-pairwise.adonis(beta_div_neutral_aran_c$S, Aran_transect_C$Elevation, perm = 999)
-pairwise.adonis(beta_div_phylo_aran_c$S, Aran_transect_C$Elevation, perm = 999)
-pairwise.adonis(beta_div_func_aran_c$S, Aran_transect_C$Elevation, perm = 999)
+```{r aran_transect_pairwise_C, eval=TRUE, results=TRUE}
+pairwise_richness<-pairwise.adonis(beta_div_richness_aran_c$S, Aran_transect_C$Elevation, perm = 999)
+pairwise_richness%>%
+  tt()
+pairwise_neutral<-pairwise.adonis(beta_div_neutral_aran_c$S, Aran_transect_C$Elevation, perm = 999)
+pairwise_neutral%>%
+  tt()
+pairwise_phylo<-pairwise.adonis(beta_div_phylo_aran_c$S, Aran_transect_C$Elevation, perm = 999)
+pairwise_phylo%>%
+  tt()
+pairwise_function<-pairwise.adonis(beta_div_func_aran_c$S, Aran_transect_C$Elevation, perm = 999)
+pairwise_function%>%
+  tt()
 ```
 
 ```{r aran_transect_data_D, eval=FALSE}
@@ -1022,11 +1070,19 @@ beta_div_phylo_aran_d<-hillpair(data=Aran_counts_D, q=1, tree=genome_tree)
 beta_div_func_aran_d<-hillpair(data=Aran_counts_func_D, q=1, dist=dist)
 ```
 
-```{r aran_transect_pairwise_D, eval=FALSE, results=TRUE}
-pairwise.adonis(beta_div_richness_aran_d$S, Aran_transect_D$Elevation, perm = 999)
-pairwise.adonis(beta_div_neutral_aran_d$S, Aran_transect_D$Elevation, perm = 999)
-pairwise.adonis(beta_div_phylo_aran_d$S, Aran_transect_D$Elevation, perm = 999)
-pairwise.adonis(beta_div_func_aran_d$S, Aran_transect_D$Elevation, perm = 999)
+```{r aran_transect_pairwise_D, eval=TRUE, results=TRUE}
+pairwise_richness<-pairwise.adonis(beta_div_richness_aran_d$S, Aran_transect_D$Elevation, perm = 999)
+pairwise_richness%>%
+  tt()
+pairwise_neutral<-pairwise.adonis(beta_div_neutral_aran_d$S, Aran_transect_D$Elevation, perm = 999)
+pairwise_neutral%>%
+  tt()
+pairwise_phylo<-pairwise.adonis(beta_div_phylo_aran_d$S, Aran_transect_D$Elevation, perm = 999)
+pairwise_phylo%>%
+  tt()
+pairwise_function<-pairwise.adonis(beta_div_func_aran_d$S, Aran_transect_D$Elevation, perm = 999)
+pairwise_function%>%
+  tt()
 ```
 
 ```{r aran_transect_data_E, eval=FALSE}
@@ -1045,11 +1101,19 @@ beta_div_phylo_aran_e<-hillpair(data=Aran_counts_E, q=1, tree=genome_tree)
 beta_div_func_aran_e<-hillpair(data=Aran_counts_func_E, q=1, dist=dist)
 ```
 
-```{r aran_transect_pairwise_E, eval=FALSE, results=TRUE}
-pairwise.adonis(beta_div_richness_aran_e$S, Aran_transect_E$Elevation, perm = 999)
-pairwise.adonis(beta_div_neutral_aran_e$S, Aran_transect_E$Elevation, perm = 999)
-pairwise.adonis(beta_div_phylo_aran_e$S, Aran_transect_E$Elevation, perm = 999)
-pairwise.adonis(beta_div_func_aran_e$S, Aran_transect_E$Elevation, perm = 999)
+```{r aran_transect_pairwise_E, eval=TRUE, results=TRUE}
+pairwise_richness<-pairwise.adonis(beta_div_richness_aran_e$S, Aran_transect_E$Elevation, perm = 999)
+pairwise_richness%>%
+  tt()
+pairwise_neutral<-pairwise.adonis(beta_div_neutral_aran_e$S, Aran_transect_E$Elevation, perm = 999)
+pairwise_neutral%>%
+  tt()
+pairwise_phylo<-pairwise.adonis(beta_div_phylo_aran_e$S, Aran_transect_E$Elevation, perm = 999)
+pairwise_phylo%>%
+  tt()
+pairwise_function<-pairwise.adonis(beta_div_func_aran_e$S, Aran_transect_E$Elevation, perm = 999)
+pairwise_function%>%
+  tt()
 ```
 
 #### Sentein
@@ -1070,11 +1134,19 @@ beta_div_phylo_sentein_a<-hillpair(data=sentein_counts_A, q=1, tree=genome_tree)
 beta_div_func_sentein_a<-hillpair(data=sentein_counts_func_A, q=1, dist=dist)
 ```
 
-```{r sentein_transect_pairwise_A, eval=FALSE, results=TRUE}
-pairwise.adonis(beta_div_richness_sentein_a$S, sentein_transect_A$Elevation, perm = 999)
-pairwise.adonis(beta_div_neutral_sentein_a$S, sentein_transect_A$Elevation, perm = 999)
-pairwise.adonis(beta_div_phylo_sentein_a$S, sentein_transect_A$Elevation, perm = 999)
-pairwise.adonis(beta_div_func_sentein_a$S, sentein_transect_A$Elevation, perm = 999)
+```{r sentein_transect_pairwise_A, eval=TRUE, results=TRUE}
+pairwise_richness<-pairwise.adonis(beta_div_richness_sentein_a$S, sentein_transect_A$Elevation, perm = 999)
+pairwise_richness%>%
+  tt()
+pairwise_neutral<-pairwise.adonis(beta_div_neutral_sentein_a$S, sentein_transect_A$Elevation, perm = 999)
+pairwise_neutral%>%
+  tt()
+pairwise_phylo<-pairwise.adonis(beta_div_phylo_sentein_a$S, sentein_transect_A$Elevation, perm = 999)
+pairwise_phylo%>%
+  tt()
+pairwise_function<-pairwise.adonis(beta_div_func_sentein_a$S, sentein_transect_A$Elevation, perm = 999)
+pairwise_function%>%
+  tt()
 ```
 
 ```{r sentein_transect_data_B, eval=FALSE}
@@ -1093,11 +1165,19 @@ beta_div_phylo_sentein_b<-hillpair(data=sentein_counts_B, q=1, tree=genome_tree)
 beta_div_func_sentein_b<-hillpair(data=sentein_counts_func_B, q=1, dist=dist)
 ```
 
-```{r sentein_transect_pairwise_B, eval=FALSE, results=TRUE}
-pairwise.adonis(beta_div_richness_sentein_b$S, sentein_transect_B$Elevation, perm = 999)
-pairwise.adonis(beta_div_neutral_sentein_b$S, sentein_transect_B$Elevation, perm = 999)
-pairwise.adonis(beta_div_phylo_sentein_b$S, sentein_transect_B$Elevation, perm = 999)
-pairwise.adonis(beta_div_func_sentein_b$S, sentein_transect_B$Elevation, perm = 999)
+```{r sentein_transect_pairwise_B, eval=TRUE, results=TRUE}
+pairwise_richness<-pairwise.adonis(beta_div_richness_sentein_b$S, sentein_transect_B$Elevation, perm = 999)
+pairwise_richness%>%
+  tt()
+pairwise_neutral<-pairwise.adonis(beta_div_neutral_sentein_b$S, sentein_transect_B$Elevation, perm = 999)
+pairwise_neutral%>%
+  tt()
+pairwise_phylo<-pairwise.adonis(beta_div_phylo_sentein_b$S, sentein_transect_B$Elevation, perm = 999)
+pairwise_phylo%>%
+  tt()
+pairwise_function<-pairwise.adonis(beta_div_func_sentein_b$S, sentein_transect_B$Elevation, perm = 999)
+pairwise_function%>%
+  tt()
 ```
 
 ```{r sentein_transect_data_C, eval=FALSE}
@@ -1116,11 +1196,19 @@ beta_div_phylo_sentein_c<-hillpair(data=sentein_counts_C, q=1, tree=genome_tree)
 beta_div_func_sentein_c<-hillpair(data=sentein_counts_func_C, q=1, dist=dist)
 ```
 
-```{r sentein_transect_pairwise_C, eval=FALSE, results=TRUE}
-pairwise.adonis(beta_div_richness_sentein_c$S, sentein_transect_C$Elevation, perm = 999)
-pairwise.adonis(beta_div_neutral_sentein_c$S, sentein_transect_C$Elevation, perm = 999)
-pairwise.adonis(beta_div_phylo_sentein_c$S, sentein_transect_C$Elevation, perm = 999)
-pairwise.adonis(beta_div_func_sentein_c$S, sentein_transect_C$Elevation, perm = 999)
+```{r sentein_transect_pairwise_C, eval=TRUE, results=TRUE}
+pairwise_richness<-pairwise.adonis(beta_div_richness_sentein_c$S, sentein_transect_C$Elevation, perm = 999)
+pairwise_richness%>%
+  tt()
+pairwise_neutral<-pairwise.adonis(beta_div_neutral_sentein_c$S, sentein_transect_C$Elevation, perm = 999)
+pairwise_neutral%>%
+  tt()
+pairwise_phylo<-pairwise.adonis(beta_div_phylo_sentein_c$S, sentein_transect_C$Elevation, perm = 999)
+pairwise_phylo%>%
+  tt()
+pairwise_function<-pairwise.adonis(beta_div_func_sentein_c$S, sentein_transect_C$Elevation, perm = 999)
+pairwise_function%>%
+  tt()
 ```
 
 #### Tourmalet
@@ -1141,11 +1229,19 @@ beta_div_phylo_tourmalet_a<-hillpair(data=tourmalet_counts_A, q=1, tree=genome_t
 beta_div_func_tourmalet_a<-hillpair(data=tourmalet_counts_func_A, q=1, dist=dist)
 ```
 
-```{r tourmalet_transect_pairwise_A, eval=FALSE, results=TRUE}
-pairwise.adonis(beta_div_richness_tourmalet_a$S, tourmalet_transect_A$Elevation, perm = 999)
-pairwise.adonis(beta_div_neutral_tourmalet_a$S, tourmalet_transect_A$Elevation, perm = 999)
-pairwise.adonis(beta_div_phylo_tourmalet_a$S, tourmalet_transect_A$Elevation, perm = 999)
-pairwise.adonis(beta_div_func_tourmalet_a$S, tourmalet_transect_A$Elevation, perm = 999)
+```{r tourmalet_transect_pairwise_A, eval=TRUE, results=TRUE}
+pairwise_richness<-pairwise.adonis(beta_div_richness_tourmalet_a$S, tourmalet_transect_A$Elevation, perm = 999)
+pairwise_richness%>%
+  tt()
+pairwise_neutral<-pairwise.adonis(beta_div_neutral_tourmalet_a$S, tourmalet_transect_A$Elevation, perm = 999)
+pairwise_neutral%>%
+  tt()
+pairwise_phylo<-pairwise.adonis(beta_div_phylo_tourmalet_a$S, tourmalet_transect_A$Elevation, perm = 999)
+pairwise_phylo%>%
+  tt()
+pairwise_function<-pairwise.adonis(beta_div_func_tourmalet_a$S, tourmalet_transect_A$Elevation, perm = 999)
+pairwise_function%>%
+  tt()
 ```
 
 ```{r tourmalet_transect_data_B, eval=FALSE}
@@ -1164,11 +1260,19 @@ beta_div_phylo_tourmalet_b<-hillpair(data=tourmalet_counts_B, q=1, tree=genome_t
 beta_div_func_tourmalet_b<-hillpair(data=tourmalet_counts_func_B, q=1, dist=dist)
 ```
 
-```{r tourmalet_transect_pairwise_B, eval=FALSE, results=TRUE}
-pairwise.adonis(beta_div_richness_tourmalet_b$S, tourmalet_transect_B$Elevation, perm = 999)
-pairwise.adonis(beta_div_neutral_tourmalet_b$S, tourmalet_transect_B$Elevation, perm = 999)
-pairwise.adonis(beta_div_phylo_tourmalet_b$S, tourmalet_transect_B$Elevation, perm = 999)
-pairwise.adonis(beta_div_func_tourmalet_b$S, tourmalet_transect_B$Elevation, perm = 999)
+```{r tourmalet_transect_pairwise_B, eval=TRUE, results=TRUE}
+pairwise_richness<-pairwise.adonis(beta_div_richness_tourmalet_b$S, tourmalet_transect_B$Elevation, perm = 999)
+pairwise_richness%>%
+  tt()
+pairwise_neutral<-pairwise.adonis(beta_div_neutral_tourmalet_b$S, tourmalet_transect_B$Elevation, perm = 999)
+pairwise_neutral%>%
+  tt()
+pairwise_phylo<-pairwise.adonis(beta_div_phylo_tourmalet_b$S, tourmalet_transect_B$Elevation, perm = 999)
+pairwise_phylo%>%
+  tt()
+pairwise_function<-pairwise.adonis(beta_div_func_tourmalet_b$S, tourmalet_transect_B$Elevation, perm = 999)
+pairwise_function%>%
+  tt()
 ```
 
 ```{r tourmalet_transect_data_C, eval=FALSE}
@@ -1187,11 +1291,19 @@ beta_div_phylo_tourmalet_c<-hillpair(data=tourmalet_counts_C, q=1, tree=genome_t
 beta_div_func_tourmalet_c<-hillpair(data=tourmalet_counts_func_C, q=1, dist=dist)
 ```
 
-```{r tourmalet_transect_pairwise_C, eval=FALSE, results=TRUE}
-pairwise.adonis(beta_div_richness_tourmalet_c$S, tourmalet_transect_C$Elevation, perm = 999)
-pairwise.adonis(beta_div_neutral_tourmalet_c$S, tourmalet_transect_C$Elevation, perm = 999)
-pairwise.adonis(beta_div_phylo_tourmalet_c$S, tourmalet_transect_C$Elevation, perm = 999)
-pairwise.adonis(beta_div_func_tourmalet_c$S, tourmalet_transect_C$Elevation, perm = 999)
+```{r tourmalet_transect_pairwise_C, eval=TRUE, results=TRUE}
+pairwise_richness<-pairwise.adonis(beta_div_richness_tourmalet_c$S, tourmalet_transect_C$Elevation, perm = 999)
+pairwise_richness%>%
+  tt()
+pairwise_neutral<-pairwise.adonis(beta_div_neutral_tourmalet_c$S, tourmalet_transect_C$Elevation, perm = 999)
+pairwise_neutral%>%
+  tt()
+pairwise_phylo<-pairwise.adonis(beta_div_phylo_tourmalet_c$S, tourmalet_transect_C$Elevation, perm = 999)
+pairwise_phylo%>%
+  tt()
+pairwise_function<-pairwise.adonis(beta_div_func_tourmalet_c$S, tourmalet_transect_C$Elevation, perm = 999)
+pairwise_function%>%
+  tt()
 ```
 
 ```{r tourmalet_transect_data_D, eval=FALSE}
@@ -1210,11 +1322,19 @@ beta_div_phylo_tourmalet_d<-hillpair(data=tourmalet_counts_D, q=1, tree=genome_t
 beta_div_func_tourmalet_d<-hillpair(data=tourmalet_counts_func_D, q=1, dist=dist)
 ```
 
-```{r tourmalet_transect_pairwise_D, eval=FALSE, results=TRUE}
-pairwise.adonis(beta_div_richness_tourmalet_d$S, tourmalet_transect_D$Elevation, perm = 999)
-pairwise.adonis(beta_div_neutral_tourmalet_d$S, tourmalet_transect_D$Elevation, perm = 999)
-pairwise.adonis(beta_div_phylo_tourmalet_d$S, tourmalet_transect_D$Elevation, perm = 999)
-pairwise.adonis(beta_div_func_tourmalet_d$S, tourmalet_transect_D$Elevation, perm = 999)
+```{r tourmalet_transect_pairwise_D, eval=TRUE, results=TRUE}
+pairwise_richness<-pairwise.adonis(beta_div_richness_tourmalet_d$S, tourmalet_transect_D$Elevation, perm = 999)
+pairwise_richness%>%
+  tt()
+pairwise_neutral<-pairwise.adonis(beta_div_neutral_tourmalet_d$S, tourmalet_transect_D$Elevation, perm = 999)
+pairwise_neutral%>%
+  tt()
+pairwise_phylo<-pairwise.adonis(beta_div_phylo_tourmalet_d$S, tourmalet_transect_D$Elevation, perm = 999)
+pairwise_phylo%>%
+  tt()
+pairwise_function<-pairwise.adonis(beta_div_func_tourmalet_d$S, tourmalet_transect_D$Elevation, perm = 999)
+pairwise_function%>%
+  tt()
 ```
 
 ```{r tourmalet_transect_data_E, eval=FALSE}
@@ -1234,10 +1354,18 @@ beta_div_func_tourmalet_e<-hillpair(data=tourmalet_counts_func_E, q=1, dist=dist
 ```
 
 ```{r tourmalet_transect_pairwise_E, eval=FALSE, results=TRUE}
-pairwise.adonis(beta_div_richness_tourmalet_e$S, tourmalet_transect_E$Elevation, perm = 999)
-pairwise.adonis(beta_div_neutral_tourmalet_e$S, tourmalet_transect_E$Elevation, perm = 999)
-pairwise.adonis(beta_div_phylo_tourmalet_e$S, tourmalet_transect_E$Elevation, perm = 999)
-pairwise.adonis(beta_div_func_tourmalet_e$S, tourmalet_transect_E$Elevation, perm = 999)
+pairwise_richness<-pairwise.adonis(beta_div_richness_tourmalet_e$S, tourmalet_transect_E$Elevation, perm = 999)
+pairwise_richness%>%
+  tt()
+pairwise_neutral<-pairwise.adonis(beta_div_neutral_tourmalet_e$S, tourmalet_transect_E$Elevation, perm = 999)
+pairwise_neutral%>%
+  tt()
+pairwise_phylo<-pairwise.adonis(beta_div_phylo_tourmalet_e$S, tourmalet_transect_E$Elevation, perm = 999)
+pairwise_phylo%>%
+  tt()
+pairwise_function<-pairwise.adonis(beta_div_func_tourmalet_e$S, tourmalet_transect_E$Elevation, perm = 999)
+pairwise_function%>%
+  tt()
 ```
 
 
