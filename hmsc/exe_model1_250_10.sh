@@ -3,11 +3,14 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=4                      # Run on 4 CPUs
 #SBATCH --mail-user=garazi.bideguren@sund.ku.dk
-#SBATCH --mem=800gb                      # Job memory request
-#SBATCH --time=435                       # In minutes
+#SBATCH --mem=200gb                      # Job memory request
+#SBATCH --time=4350                       # In minutes
 
 # Activate conda environment
 module load mamba/1.3.1
+if ! conda info --envs | grep -q hmsc; then
+  mamba create -p ./hmsc/hmsc_env -y r-essentials r-base r-tidyverse r-Hmsc
+fi
 source activate /maps/projects/mjolnir1/people/dlz554/hmsc_env
 
 # Run R script

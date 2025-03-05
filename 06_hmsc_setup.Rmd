@@ -37,11 +37,17 @@ StudyDesign <- sample_metadata %>%
                     #mutate(Elevation = factor(Elevation)) %>%
                     column_to_rownames("EHI_number")
 
+#Calculate normalisation factor to account for genome length
+normalisation_factor <- genome_metadata %>% 
+  filter(genome %in% selected_genomes2) %>%
+  mutate(factor=median(length)/length) %>%
+  pull(factor)
+
 # Genome count table (quantitative community data)
 YData <- read_counts  %>%
                     filter(genome %in% selected_genomes2) %>% #subset genomes
+                    mutate(across(where(is.numeric), ~ round(. * normalisation_factor,0) )) %>% 
                     mutate(across(where(is.numeric), ~ . +1 )) %>% #add +1 pseudocount to remove zeros
-                    mutate(across(where(is.numeric), ~ . / (genome_metadata_subset$length / 150) )) %>% #transform to genome counts
                     mutate(across(where(is.numeric), ~  log(.) )) %>% #log-transform
                     column_to_rownames("genome") %>%
                     select(all_of(row.names(StudyDesign))) %>%
@@ -160,17 +166,20 @@ for(i in c(1:nrow(modelchains))){
       psrf.gamma.name <-  paste0("psrf.gamma.",modelname,"_",sample,"_",thin)
       psrf.rho.name <-  paste0("psrf.rho.",modelname,"_",sample,"_",thin)
       jobname <- paste0("hmsc_",modelname,"_",sample,"_",thin)
-      minutes <- round(sample * thin * (ncol(YData)/500), 0)
+      minutes <- round(sample * thin * (ncol(YData)/50), 0)
       code <- sprintf("#!/bin/bash
 #SBATCH --job-name=%s                   # Job name
 #SBATCH --nodes=1
 #SBATCH --ntasks=4                      # Run on 4 CPUs
 #SBATCH --mail-user=garazi.bideguren@sund.ku.dk
-#SBATCH --mem=800gb                      # Job memory request
+#SBATCH --mem=200gb                      # Job memory request
 #SBATCH --time=%d                       # In minutes
 
 # Activate conda environment
 module load mamba/1.3.1
+if ! conda info --envs | grep -q hmsc; then
+  mamba create -p ./hmsc/hmsc_env -y r-essentials r-base r-tidyverse r-Hmsc
+fi
 source activate /maps/projects/mjolnir1/people/dlz554/hmsc_env
 
 # Run R script

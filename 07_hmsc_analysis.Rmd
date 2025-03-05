@@ -293,7 +293,7 @@ getPostEstimate(hM=m, parName="Beta")$support %>%
           value >= support ~ "Positive",
           value <= negsupport ~ "Negative",
           TRUE ~ "Neutral")) %>%
-    filter(variable=="Elevation") %>%
+    filter(variable=="Elevation") %>% #or I(Elevation^2)?
     select(genome,trend) %>%
     left_join(pred_elevation, by=join_by(genome==genome)) %>%
     group_by(genome, trend, elevation) %>%

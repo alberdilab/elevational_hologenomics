@@ -2,11 +2,14 @@
 
 ```{r load_data_community_1}
 load("data/data.Rdata")
+load("data/alpha_div_05032025.Rdata")
+load("data/beta_div_05032025.Rdata")
+load("data/beta_div_pop_05032025.Rdata")
 ```
 
 ## Alpha diversity
 
-```{r alpha_div, comment="", message=FALSE, warning=FALSE}
+```{r alpha_div, comment="", message=FALSE, warning=FALSE, eval=FALSE}
 # Calculate Hill numbers
 richness <- genome_counts_filt %>%
   column_to_rownames(var = "genome") %>%
@@ -74,7 +77,15 @@ alpha_div <- richness %>%
   full_join(neutral, by = join_by(sample == sample)) %>%
   full_join(phylogenetic, by = join_by(sample == sample)) %>%
   full_join(functional, by = join_by(sample == sample))
+
+save(richness,
+     neutral,
+     phylogenetic,
+     functional,
+     alpha_div,
+     file = "data/alpha_div_05032025.Rdata")
 ```
+
 ```{r alpha_div_summary, comment="", message=FALSE, warning=FALSE, fig.height=4, fig.width=10, fig.fullwidth=TRUE}
 alpha_div %>%
   pivot_longer(-sample, names_to = "alpha", values_to = "value") %>%
@@ -128,7 +139,7 @@ alpha_div %>%
       
 ```
 
-### Regression plots
+### Regression plots per transect
 
 #### Richness diversity
 
@@ -195,7 +206,7 @@ alpha_div %>%
         labs(x = "Elevation (m)")
 ```
 
-### Mixed models
+### Mixed models per metric
 
 #### Richness diversity
 
@@ -257,7 +268,7 @@ func_cor %>%
   paged_table()
 ```
 
-## Beta diversity
+## Beta diversity per individual
 
 ```{r beta_div, comment="", message=FALSE, warning=FALSE, eval=FALSE}
 beta_q0n <- genome_counts_filt %>%
@@ -275,38 +286,15 @@ beta_q1p <- genome_counts_filt %>%
 beta_q1f <- genome_counts_filt_filt %>%
   #column_to_rownames(., "genome") %>%
   hillpair(., q = 1, dist = dist)
-```
 
-### Beta diversity per individual
+save(beta_q0n,
+     beta_q1n,
+     beta_q1p,
+     beta_q1f,
+     file = "data/alpha_div_05032025.Rdata")
+```
 
 #### Richness
-
-```{r beta_div_richness_nmds, echo=TRUE, results = FALSE}
-beta_q0n_nmds <- beta_q0n$S %>%
-                metaMDS(.,trymax = 500, k=2, verbosity=FALSE) %>%
-                vegan::scores() %>%
-                as_tibble(., rownames = "sample") %>%
-                left_join(sample_metadata, by = join_by(sample == EHI_number))
-```
-
-```{r beta_div_richness_centroids, echo=TRUE}
-group_n <- length(unique(beta_q0n_nmds$Transect))
-beta_q0n_nmds$Elevation<-as.character(beta_q0n_nmds$Elevation)
-
-beta_q0n_nmds %>%
-            group_by(Elevation) %>%
-            mutate(x_cen = mean(NMDS1, na.rm = TRUE)) %>%
-            mutate(y_cen = mean(NMDS2, na.rm = TRUE)) %>%
-            ungroup() %>%
-            ggplot(., aes(x=NMDS1,y=NMDS2, color=Elevation)) +
-                #scale_color_manual(values=beta_colors[c(1:group_n)]) +
-                geom_point(size=2) +
-                geom_segment(aes(x=x_cen, y=y_cen, xend=NMDS1, yend=NMDS2), alpha=0.2) +
-                theme_classic() +
-                facet_wrap(.~Transect, scale="free") +
-                theme(legend.position="right", legend.box="vertical") +
-                guides(color=guide_legend(title="Elevation"))
-```
 
 ```{r beta_div_richness_permutest, echo=TRUE, results = TRUE}
 betadisper(beta_q0n$S, sample_metadata$Transect) %>% permutest(., pairwise=TRUE) 
@@ -323,33 +311,6 @@ adonis2(beta_q0n$S ~ Elevation+Transect+Sampling_point,
 
 #### Neutral
 
-```{r beta_div_neutral_nmds, echo=TRUE, results = FALSE}
-beta_q1n_nmds <- beta_q1n$S %>%
-                metaMDS(.,trymax = 500, k=2, verbosity=FALSE) %>%
-                vegan::scores() %>%
-                as_tibble(., rownames = "sample") %>%
-                left_join(sample_metadata, by = join_by(sample == EHI_number))
-```
-
-```{r beta_div_neutral_centroids, echo=TRUE}
-group_n <- length(unique(beta_q1n_nmds$Transect))
-beta_q1n_nmds$Elevation<-as.character(beta_q1n_nmds$Elevation)
-
-beta_q1n_nmds %>%
-            group_by(Elevation) %>%
-            mutate(x_cen = mean(NMDS1, na.rm = TRUE)) %>%
-            mutate(y_cen = mean(NMDS2, na.rm = TRUE)) %>%
-            ungroup() %>%
-            ggplot(., aes(x=NMDS1,y=NMDS2, color=Elevation)) +
-                #scale_color_manual(values=beta_colors[c(1:group_n)]) +
-                geom_point(size=2) +
-                geom_segment(aes(x=x_cen, y=y_cen, xend=NMDS1, yend=NMDS2), alpha=0.2) +
-                theme_classic() +
-                facet_wrap(.~Transect, scale="free") +
-                theme(legend.position="right", legend.box="vertical") +
-                guides(color=guide_legend(title="Elevation"))
-```
-
 ```{r beta_div_neutral_permutest, echo=TRUE, results = TRUE}
 betadisper(beta_q1n$S, sample_metadata$Transect) %>% permutest(., pairwise=TRUE) 
 ```
@@ -364,32 +325,6 @@ adonis2(beta_q1n$S ~ Elevation*Transect+Sampling_point,
 ```
 
 #### Phylogenetic
-
-```{r beta_div_phylo_nmds, echo=TRUE, results = FALSE}
-beta_q1p_nmds <- beta_q1p$S %>%
-                metaMDS(.,trymax = 500, k=2, verbosity=FALSE) %>%
-                vegan::scores() %>%
-                as_tibble(., rownames = "sample") %>%
-                left_join(sample_metadata, by = join_by(sample == EHI_number))
-```
-
-```{r beta_div_phylo_centroids, echo=TRUE}
-beta_q1p_nmds$Elevation<-as.character(beta_q1p_nmds$Elevation)
-
-beta_q1p_nmds %>%
-            group_by(Elevation) %>%
-            mutate(x_cen = mean(NMDS1, na.rm = TRUE)) %>%
-            mutate(y_cen = mean(NMDS2, na.rm = TRUE)) %>%
-            ungroup() %>%
-            ggplot(., aes(x=NMDS1,y=NMDS2, color=Elevation)) +
-                #scale_color_manual(values=beta_colors[c(1:group_n)]) +
-                geom_point(size=2) +
-                geom_segment(aes(x=x_cen, y=y_cen, xend=NMDS1, yend=NMDS2), alpha=0.2) +
-                theme_classic() +
-                facet_wrap(.~Transect, scale="free") +
-                theme(legend.position="right", legend.box="vertical") +
-                guides(color=guide_legend(title="Elevation"))
-```
 
 ```{r beta_div_phylo_permutest, echo=TRUE, results = TRUE}
 betadisper(beta_q1p$S, sample_metadata$Transect) %>% permutest(., pairwise=TRUE) 
@@ -406,34 +341,6 @@ adonis2(beta_q1p$S ~ Elevation+Transect+Sampling_point,
 
 #### Functional
 
-```{r beta_div_func_nmds, echo=TRUE, results = FALSE}
-beta_q1f_nmds <- beta_q1f$S %>%
-                metaMDS(.,trymax = 500, k=2, verbosity=FALSE) %>%
-                vegan::scores() %>%
-                as_tibble(., rownames = "sample") %>%
-                left_join(sample_metadata, by = join_by(sample == EHI_number))
-```
-
-```{r beta_div_func_centroids, echo=TRUE}
-group_n <- length(unique(beta_q1f_nmds$Transect))
-beta_q1f_nmds$Elevation<-as.character(beta_q1f_nmds$Elevation)
-
-
-beta_q1f_nmds %>%
-            group_by(Elevation) %>%
-            mutate(x_cen = mean(NMDS1, na.rm = TRUE)) %>%
-            mutate(y_cen = mean(NMDS2, na.rm = TRUE)) %>%
-            ungroup() %>%
-            ggplot(., aes(x=NMDS1,y=NMDS2, color=Elevation)) +
-                #scale_color_manual(values=beta_colors[c(1:group_n)]) +
-                geom_point(size=2) +
-                geom_segment(aes(x=x_cen, y=y_cen, xend=NMDS1, yend=NMDS2), alpha=0.2) +
-                theme_classic() +
-                facet_wrap(.~Transect, scale="free") +
-                theme(legend.position="right", legend.box="vertical") +
-                guides(color=guide_legend(title="Elevation"))
-```
-
 ```{r beta_div_func_permutest, echo=TRUE, results = TRUE}
 betadisper(beta_q1f$S, sample_metadata$Transect) %>% permutest(., pairwise=TRUE) 
 ```
@@ -447,7 +354,7 @@ adonis2(beta_q1f$S ~ Elevation+Transect+Sampling_point,
         tt()
 ```
 
-### Beta diversity per population
+## Beta diversity per population
 
 ```{r beta_div_transects, comment="", message=FALSE, warning=FALSE, eval=FALSE}
 richness_beta <- genome_counts_filt %>%
@@ -526,6 +433,13 @@ beta_div <- bind_rows(richness_beta,neutral_beta,phylogenetic_beta,functional_be
   rownames_to_column(var="Sampling_point") %>% 
   as_tibble() %>% 
   rename("richness"=V1,"neutral"=V2,"phylogenetic"=V3,"functional"=V4)
+
+save(richness_beta,
+     neutral_beta,
+     phylogenetic_beta,
+     functional_beta,
+     beta_div,
+     file = "data/beta_div_pop_05032025.Rdata")
 ```
 
 ```{r beta_div_boxplot, comment="", message=FALSE, warning=FALSE, fig.height=5, fig.width=10, fig.fullwidth=TRUE}
@@ -555,7 +469,7 @@ beta_div %>%
 ```
 
 ```{r beta_div_boxplot_1, comment="", results=FALSE, message=FALSE, warning=FALSE, fig.height=5, fig.width=10, fig.fullwidth=TRUE}
-bxp1<-beta_div %>%
+beta_div %>%
   pivot_longer(-Sampling_point, names_to = "metric", values_to = "value") %>%
   left_join(sample_metadata %>% select(Transect,Sampling_point, Elevation) %>% unique, by = "Sampling_point") %>%
   mutate(metric=factor(metric,levels=c("richness","neutral","phylogenetic","functional"))) %>%
@@ -579,1167 +493,486 @@ bxp1<-beta_div %>%
       ) + 
   ylab("Beta diversity")
 
-#bxp1 + 
-  #geom_signif(comparisons = list(c("Aisa", "Aran"), c("Aisa", "Sentein"), c("Aisa", "Tourmalet"),c("Aran", "Sentein"), c("Aran", "Tourmalet"), 
-                                # c("Sentein", "Tourmalet")),
-             # map_signif_level = TRUE)
 ```
 
-### Beta diversity per transect (calculated from individuals)
+### Transit zones
 
-#### Aisa transect
-
-```{r aisa_samples, echo=FALSE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-Aisa_transect<-sample_metadata %>%
-    filter(Transect=="Aisa")%>%
-    column_to_rownames("EHI_number")
-
-Aisa_transect_nmds<-sample_metadata %>%
-    filter(Transect=="Aisa")
-
-# Create a temporary modified version of genome_counts_filt
-temp_genome_counts <- transform(genome_counts_filt, row.names = genome_counts_filt$genome)
-temp_genome_counts$genome <- NULL
-temp_genome_counts_func <- transform(genome_counts_filt_filt, row.names = genome_counts_filt_filt$genome)
-temp_genome_counts_func$genome <- NULL
-
-Aisa_counts <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(Aisa_transect))]
-identical(sort(colnames(Aisa_counts)), sort(as.character(rownames(Aisa_transect))))
-Aisa_counts_func <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(Aisa_transect))]
+```{r beta_div_pop_data, comment="", results=FALSE, message=FALSE, warning=FALSE}
+beta_div_pop<-beta_div %>%
+  pivot_longer(-Sampling_point, names_to = "metric", values_to = "value") %>%
+  left_join(sample_metadata %>% select(Transect,Sampling_point, Elevation) %>% unique, by = "Sampling_point")
+beta_div_pop <- beta_div_pop %>%
+  mutate(Zones = case_when(
+    Transect == "Aisa" & Elevation == 1450 ~ "Z0",
+    Transect == "Aisa" & Elevation == 1650 ~ "Z1",
+    Transect == "Aisa" & Elevation == 1850 ~ "Z2",
+    Transect == "Aran" & Elevation == 1000 ~ "Z0",
+    Transect == "Aran" & Elevation == 1500 ~ "Z1",
+    Transect == "Aran" & Elevation == 1650 ~ "Z2",
+    Transect == "Aran" & Elevation == 1850 ~ "Z3",
+    Transect == "Sentein" & Elevation == 941 ~ "Z0",
+    Transect == "Sentein" & Elevation == 1260 ~ "Z1",
+    Transect == "Sentein" & Elevation == 1628 ~ "Z2",
+    Transect == "Sentein" & Elevation == 1873 ~ "Z3",
+    Transect == "Tourmalet" & Elevation == 953 ~ "Z0",
+    Transect == "Tourmalet" & Elevation == 1255 ~ "Z1",
+    Transect == "Tourmalet" & Elevation == 1797 ~ "Z2",
+    Transect == "Tourmalet" & Elevation == 2306 ~ "Z3",
+    TRUE ~ NA_character_)) %>%
+  filter(Zones!="NA")
 ```
 
-```{r aisa_samples_1, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-nrow(Aisa_transect)
-```
-
-```{r beta_div_aisa, echo=TRUE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
-beta_div_richness_aisa<-hillpair(data=Aisa_counts, q=0)
-beta_div_neutral_aisa<-hillpair(data=Aisa_counts, q=1)
-beta_div_phylo_aisa<-hillpair(data=Aisa_counts, q=1, tree=genome_tree)
-beta_div_func_aisa<-hillpair(data=Aisa_counts_func, q=1, dist=dist)
-```
-
-```{r beta_div_aisa_reg, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-adonis2(beta_div_richness_aisa$S ~ Elevation+Sampling_point, 
-        data = Aisa_transect %>% arrange(match(sample,labels(beta_div_richness_aisa$S))), 
-        permutations = 999,
-        by="terms") %>%
-        broom::tidy() %>%
-        tt()
-```
-
-```{r beta_div_aisa_reg_1, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-adonis2(beta_div_neutral_aisa$S ~ Elevation+Sampling_point, 
-        data = Aisa_transect %>% arrange(match(sample,labels(beta_div_neutral_aisa$S))), 
-        permutations = 999,
-        by="terms") %>%
-        broom::tidy() %>%
-        tt()
-```
-
-```{r beta_div_aisa_reg_2, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-adonis2(beta_div_phylo_aisa$S ~ Elevation+Sampling_point, 
-        data = Aisa_transect %>% arrange(match(sample,labels(beta_div_phylo_aisa$S))), 
-        permutations = 999,
-        by="terms") %>%
-        broom::tidy() %>%
-        tt()
-```
-
-```{r beta_div_aisa_reg_3, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-adonis2(beta_div_func_aisa$S ~ Elevation+Sampling_point, 
-        data = Aisa_transect %>% arrange(match(sample,labels(beta_div_func_aisa$S))), 
-        permutations = 999,
-        by="terms") %>%
-        broom::tidy() %>%
-        tt()
-```
-
-#### Aran transect
-
-```{r aran_samples, echo=FALSE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE}
-Aran_transect<-sample_metadata %>%
-    filter(Transect=="Aran")%>%
-    column_to_rownames("EHI_number")
-
-Aran_transect_nmds<-sample_metadata %>%
-    filter(Transect=="Aran")
-
-Aran_counts <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(Aran_transect))]
-identical(sort(colnames(Aran_counts)), sort(as.character(rownames(Aran_transect))))
-Aran_counts_func <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(Aran_transect))]
-```
-
-```{r aran_samples_1, echo=FALSE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-nrow(Aran_transect)
-```
-
-```{r beta_div_aran, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
-beta_div_richness_aran<-hillpair(data=Aran_counts, q=0)
-beta_div_neutral_aran<-hillpair(data=Aran_counts, q=1)
-beta_div_phylo_aran<-hillpair(data=Aran_counts, q=1, tree=genome_tree)
-beta_div_func_aran<-hillpair(data=Aran_counts_func, q=1, dist=dist)
-```
-```{r beta_div_aran_reg, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-adonis2(beta_div_richness_aran$S ~ Elevation+Sampling_point, 
-        data = Aran_transect %>% arrange(match(sample,labels(beta_div_richness_aran$S))), 
-        permutations = 999,
-        by="terms") %>%
-        broom::tidy() %>%
-        tt()
-```
-
-```{r beta_div_aran_reg_1, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-adonis2(beta_div_neutral_aran$S ~ Elevation+Sampling_point, 
-        data = Aran_transect %>% arrange(match(sample,labels(beta_div_neutral_aran$S))), 
-        permutations = 999,
-        by="terms") %>%
-        broom::tidy() %>%
-        tt()
-```
-
-```{r beta_div_aran_reg_2,echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-adonis2(beta_div_phylo_aran$S ~ Elevation+Sampling_point, 
-        data = Aran_transect %>% arrange(match(sample,labels(beta_div_phylo_aran$S))), 
-        permutations = 999,
-        by="terms") %>%
-        broom::tidy() %>%
-        tt()
-```
-
-```{r beta_div_aran_reg_3, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-adonis2(beta_div_func_aran$S ~ Elevation+Sampling_point, 
-        data = Aran_transect %>% arrange(match(sample,labels(beta_div_func_aran$S))), 
-        permutations = 999,
-        by="terms") %>%
-        broom::tidy() %>%
-        tt()
-```
-
-
-#### Sentein transect
-
-```{r sentein_samples, echo=FALSE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE}
-sentein_transect<-sample_metadata %>%
-    filter(Transect=="Sentein")%>%
-    column_to_rownames("EHI_number")
-
-sentein_transect_nmds<-sample_metadata %>%
-    filter(Transect=="Sentein")
-
-sentein_counts <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(sentein_transect))]
-identical(sort(colnames(sentein_counts)), sort(as.character(rownames(sentein_transect))))
-sentein_counts_func <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(sentein_transect))]
+```{r beta_div_boxplot_2, comment="", results=FALSE, message=FALSE, warning=FALSE, fig.height=5, fig.width=10, fig.fullwidth=TRUE}
+beta_div_pop %>%
+  #pivot_longer(-Sampling_point, names_to = "metric", values_to = "value") %>%
+  #left_join(sample_metadata %>% select(Transect,Sampling_point, Elevation) %>% unique, by = "Sampling_point") %>%
+  mutate(metric=factor(metric,levels=c("richness","neutral","phylogenetic","functional"))) %>%
+      ggplot(aes(y = value, x = Elevation ,group=Elevation, colour=Transect)) +
+      #geom_boxplot(outlier.shape = NA) +
+      geom_point(aes(color = Transect), alpha = 0.5, size = 2) + 
+      geom_line(aes(group = interaction(Transect, metric)), position = position_dodge(width = 0.5))+
+      #scale_color_viridis_c(name = "Elevation", option = "viridis") +
+      scale_color_manual(name="Transect",
+          breaks=c("Aisa","Aran","Sentein","Tourmalet"),
+          labels=c("Aisa","Aran","Sentein","Tourmalet"),
+          values=c("#e5bd5b50", "#6b739850","#e2815a50", "#876b9650")) +
+      facet_wrap(. ~ metric, scales = "free", ncol=4) +
+      coord_cartesian(xlim = c(1, NA)) +
+      #stat_compare_means(size=2) +
+      theme_classic() +
+      theme(
+        strip.background = element_blank(),
+        panel.grid.minor.x = element_line(size = .1, color = "grey"),
+        axis.text.x = element_text(angle = 45, hjust = 1)
+      ) + 
+  ylab("Beta diversity")
 
 ```
-
-```{r sentein_samples_1, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-nrow(sentein_transect)
-```
-
-```{r beta_div_sentein, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
-beta_div_richness_sentein<-hillpair(data=sentein_counts, q=0)
-beta_div_neutral_sentein<-hillpair(data=sentein_counts, q=1)
-beta_div_phylo_sentein<-hillpair(data=sentein_counts, q=1, tree=genome_tree)
-beta_div_func_sentein<-hillpair(data=sentein_counts_func, q=1, dist=dist)
-```
-
-```{r beta_div_sentein_reg, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-adonis2(beta_div_richness_sentein$S ~ Elevation+Sampling_point, 
-        data = sentein_transect %>% arrange(match(sample,labels(beta_div_richness_sentein$S))), 
-        permutations = 999,
-        by="terms") %>%
-        broom::tidy() %>%
-        tt()
-```
-
-```{r beta_div_sentein_reg_1, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-adonis2(beta_div_neutral_sentein$S ~ Elevation+Sampling_point, 
-        data = sentein_transect %>% arrange(match(sample,labels(beta_div_neutral_sentein$S))), 
-        permutations = 999,
-        by="terms") %>%
-        broom::tidy() %>%
-        tt()
-```
-
-```{r beta_div_sentein_reg_2, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-adonis2(beta_div_phylo_sentein$S ~ Elevation+Sampling_point, 
-        data = sentein_transect %>% arrange(match(sample,labels(beta_div_phylo_sentein$S))), 
-        permutations = 999,
-        by="terms") %>%
-        broom::tidy() %>%
-        tt()
-```
-
-```{r beta_div_sentein_reg_3, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-adonis2(beta_div_func_sentein$S ~ Elevation+Sampling_point, 
-        data = sentein_transect %>% arrange(match(sample,labels(beta_div_func_sentein$S))), 
-        permutations = 999,
-        by="terms") %>%
-        broom::tidy() %>%
-        tt()
-```
-
-#### Tourmalet transect
-
-```{r tourmalet_samples, echo=FALSE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE}
-tourmalet_transect<-sample_metadata %>%
-    filter(Transect=="Tourmalet")%>%
-    column_to_rownames("EHI_number")
-
-tourmalet_transect_nmds<-sample_metadata %>%
-    filter(Transect=="Tourmalet")
-
-tourmalet_counts <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(tourmalet_transect))]
-identical(sort(colnames(tourmalet_counts)), sort(as.character(rownames(tourmalet_transect))))
-tourmalet_counts_func <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(tourmalet_transect))]
-
-```
-
-```{r tourmalet_samples_1, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-nrow(tourmalet_transect)
-```
-
-```{r beta_div_tourmalet, echo=TRUE, results = FALSE, message=FALSE, warning=FALSE, comments=FALSE, eval=FALSE}
-beta_div_richness_tourmalet<-hillpair(data=tourmalet_counts, q=0)
-beta_div_neutral_tourmalet<-hillpair(data=tourmalet_counts, q=1)
-beta_div_phylo_tourmalet<-hillpair(data=tourmalet_counts, q=1, tree=genome_tree)
-beta_div_func_tourmalet<-hillpair(data=tourmalet_counts_func, q=1, dist=dist)
-```
-
-```{r beta_div_tourmalet_reg, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-adonis2(beta_div_richness_tourmalet$S ~ Elevation+Sampling_point, 
-        data = tourmalet_transect %>% arrange(match(sample,labels(beta_div_richness_tourmalet$S))), 
-        permutations = 999,
-        by="terms") %>%
-        broom::tidy() %>%
-        tt()
-```
-
-```{r beta_div_tourmalet_reg_1, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-adonis2(beta_div_neutral_tourmalet$S ~ Elevation+Sampling_point, 
-        data = tourmalet_transect %>% arrange(match(sample,labels(beta_div_neutral_tourmalet$S))), 
-        permutations = 999,
-        by="terms") %>%
-        broom::tidy() %>%
-        tt()
-```
-
-```{r beta_div_tourmalet_reg_2, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-adonis2(beta_div_phylo_tourmalet$S ~ Elevation+Sampling_point, 
-        data = tourmalet_transect %>% arrange(match(sample,labels(beta_div_phylo_tourmalet$S))), 
-        permutations = 999,
-        by="terms") %>%
-        broom::tidy() %>%
-        tt()
-```
-
-```{r beta_div_tourmalet_reg_3, echo=TRUE, results = TRUE, message=FALSE, warning=FALSE, comments=FALSE}
-adonis2(beta_div_func_tourmalet$S ~ Elevation+Sampling_point, 
-        data = tourmalet_transect %>% arrange(match(sample,labels(beta_div_func_tourmalet$S))), 
-        permutations = 999,
-        by="terms") %>%
-        broom::tidy() %>%
-        tt()
-```
-
-### Beta diversity per transect (calculated from elevation chunks)
-
-```{r transect_data, eval=FALSE}
-Aisa_transect<-sample_metadata %>%
-    filter(Transect=="Aisa")%>%
-    column_to_rownames("EHI_number")
-
-Aran_transect<-sample_metadata %>%
-    filter(Transect=="Aran")%>%
-    column_to_rownames("EHI_number")
-
-sentein_transect<-sample_metadata %>%
-    filter(Transect=="Sentein")%>%
-    column_to_rownames("EHI_number")
-
-tourmalet_transect<-sample_metadata %>%
-    filter(Transect=="Tourmalet")%>%
-    column_to_rownames("EHI_number")
-```
-
 
 #### Aisa
 
-```{r aisa_transect_data_A, eval=FALSE}
-Aisa_transect_A<-Aisa_transect %>%
-  filter(Elevation=="1250" | Elevation=="1450")
-
-Aisa_counts_A <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(Aisa_transect_A))]
-identical(sort(colnames(Aisa_counts_A)), sort(as.character(rownames(Aisa_transect_A))))
-Aisa_counts_func_A <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(Aisa_transect_A))]
+```{r beta_div_pop_aisa_data, warning=FALSE, comments="", message=FALSE}
+samples_to_keep_aisa <- sample_metadata %>%
+  filter(Transect == "Aisa") %>% 
+  filter(Elevation!=1250)%>% 
+  select(EHI_number) %>% 
+  pull()
+subset_meta_aisa <- sample_metadata %>%
+  filter(Transect == "Aisa")%>% 
+  filter(Elevation!=1250)%>%
+  mutate(Zones = case_when(
+    Transect == "Aisa" & Elevation == 1450 ~ "Z0",
+    Transect == "Aisa" & Elevation == 1650 ~ "Z1",
+    Transect == "Aisa" & Elevation == 1850 ~ "Z2"))
 ```
 
-```{r aisa_transect_beta_div_A, eval=FALSE}
-beta_div_richness_aisa_a<-hillpair(data=Aisa_counts_A, q=0)
-beta_div_neutral_aisa_a<-hillpair(data=Aisa_counts_A, q=1)
-beta_div_phylo_aisa_a<-hillpair(data=Aisa_counts_A, q=1, tree=genome_tree)
-beta_div_func_aisa_a<-hillpair(data=Aisa_counts_func_A, q=1, dist=dist)
+***Richness***
+```{r beta_div_pop_aisa, warning=FALSE, comments="", message=FALSE}
+richness_aisa<-as.matrix(beta_q0n$S)
+richness_aisa <- as.dist(richness_aisa[rownames(richness_aisa) %in% samples_to_keep_aisa,
+               colnames(richness_aisa) %in% samples_to_keep_aisa])
+betadisper(richness_aisa, subset_meta_aisa$Zones) %>% permutest(., pairwise = TRUE)
 ```
 
-```{r aisa_transect_pairwise_A, eval=TRUE, results=TRUE}
-pairwise_richness<-pairwise.adonis(beta_div_richness_aisa_a$S, Aisa_transect_A$Elevation, perm = 999)
-pairwise_richness%>%
-  tt()
-pairwise_neutral<-pairwise.adonis(beta_div_neutral_aisa_a$S, Aisa_transect_A$Elevation, perm = 999)
-pairwise_neutral%>%
-  tt()
-pairwise_phylo<-pairwise.adonis(beta_div_phylo_aisa_a$S, Aisa_transect_A$Elevation, perm = 999)
-pairwise_phylo%>%
-  tt()
-pairwise_function<-pairwise.adonis(beta_div_func_aisa_a$S, Aisa_transect_A$Elevation, perm = 999)
-pairwise_function%>%
-  tt()
+```{r beta_richness_permanova_aisa, warning=FALSE, comments="", message=FALSE}
+adonis2(richness_aisa ~ Zones,
+        data = subset_meta_aisa %>% arrange(match(EHI_number,labels(richness_aisa))),
+        permutations = 999) %>%
+        broom::tidy() %>%
+        tt()
 ```
 
-```{r aisa_transect_data_B, eval=FALSE}
-Aisa_transect_B<-Aisa_transect %>%
-  filter(Elevation=="1450" | Elevation=="1650")
-
-Aisa_counts_B <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(Aisa_transect_B))]
-identical(sort(colnames(Aisa_counts_B)), sort(as.character(rownames(Aisa_transect_B))))
-Aisa_counts_func_B <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(Aisa_transect_B))]
-```
-
-```{r aisa_transect_beta_div_B, eval=FALSE}
-beta_div_richness_aisa_b<-hillpair(data=Aisa_counts_B, q=0)
-beta_div_neutral_aisa_b<-hillpair(data=Aisa_counts_B, q=1)
-beta_div_phylo_aisa_b<-hillpair(data=Aisa_counts_B, q=1, tree=genome_tree)
-beta_div_func_aisa_b<-hillpair(data=Aisa_counts_func_B, q=1, dist=dist)
-```
-
-```{r aisa_transect_pairwise_B, eval=TRUE, results=TRUE}
-pairwise_richness<-pairwise.adonis(beta_div_richness_aisa_b$S, Aisa_transect_B$Elevation, perm = 999)
-pairwise_richness%>%
-  tt()
-pairwise_neutral<-pairwise.adonis(beta_div_neutral_aisa_b$S, Aisa_transect_B$Elevation, perm = 999)
-pairwise_neutral%>%
-  tt()
-pairwise_phylo<-pairwise.adonis(beta_div_phylo_aisa_b$S, Aisa_transect_B$Elevation, perm = 999)
-pairwise_phylo%>%
-  tt()
-pairwise_function<-pairwise.adonis(beta_div_func_aisa_b$S, Aisa_transect_B$Elevation, perm = 999)
-pairwise_function%>%
+```{r beta_div_pop_aisa_1, warning=FALSE, comments="", message=FALSE}
+pairwise <- pairwise.adonis(richness_aisa, subset_meta_aisa$Zones, perm=999)
+pairwise%>%
   tt()
 ```
 
-```{r aisa_transect_data_C, eval=FALSE}
-Aisa_transect_C<-Aisa_transect %>%
-  filter(Elevation=="1650" | Elevation=="1850")
-
-Aisa_counts_C <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(Aisa_transect_C))]
-identical(sort(colnames(Aisa_counts_C)), sort(as.character(rownames(Aisa_transect_C))))
-Aisa_counts_func_C <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(Aisa_transect_C))]
+***Neutral***
+```{r beta_div_pop_neut_aisa, warning=FALSE, comments="", message=FALSE}
+neutral_aisa<-as.matrix(beta_q1n$S)
+neutral_aisa <- as.dist(neutral_aisa[rownames(neutral_aisa) %in% samples_to_keep_aisa,
+               colnames(neutral_aisa) %in% samples_to_keep_aisa])
+betadisper(neutral_aisa, subset_meta_aisa$Zones) %>% permutest(., pairwise = TRUE)
 ```
 
-```{r aisa_transect_beta_div_C, eval=FALSE}
-beta_div_richness_aisa_c<-hillpair(data=Aisa_counts_C, q=0)
-beta_div_neutral_aisa_c<-hillpair(data=Aisa_counts_C, q=1)
-beta_div_phylo_aisa_c<-hillpair(data=Aisa_counts_C, q=1, tree=genome_tree)
-beta_div_func_aisa_c<-hillpair(data=Aisa_counts_func_C, q=1, dist=dist)
+```{r beta_richness_permanova_neut_aisa, warning=FALSE, comments="", message=FALSE}
+adonis2(neutral_aisa ~ Zones,
+        data = subset_meta_aisa %>% arrange(match(EHI_number,labels(neutral_aisa))),
+        permutations = 999) %>%
+        broom::tidy() %>%
+        tt()
 ```
 
-```{r aisa_transect_pairwise_C, eval=TRUE, results=TRUE}
-pairwise_richness<-pairwise.adonis(beta_div_richness_aisa_c$S, Aisa_transect_C$Elevation, perm = 999)
-pairwise_richness%>%
+```{r beta_div_pop_aisa_neut_1, warning=FALSE, comments="", message=FALSE}
+pairwise <- pairwise.adonis(neutral_aisa, subset_meta_aisa$Zones, perm=999)
+pairwise%>%
   tt()
-pairwise_neutral<-pairwise.adonis(beta_div_neutral_aisa_c$S, Aisa_transect_C$Elevation, perm = 999)
-pairwise_neutral%>%
+```
+
+***Phylogenetic***
+```{r beta_div_pop_phylo_aisa, warning=FALSE, comments="", message=FALSE}
+phylo_aisa<-as.matrix(beta_q1p$S)
+phylo_aisa <- as.dist(phylo_aisa[rownames(phylo_aisa) %in% samples_to_keep_aisa,
+               colnames(phylo_aisa) %in% samples_to_keep_aisa])
+betadisper(phylo_aisa, subset_meta_aisa$Zones) %>% permutest(., pairwise = TRUE)
+```
+
+```{r beta_richness_permanova_phylo_aisa, warning=FALSE, comments="", message=FALSE}
+adonis2(phylo_aisa ~ Zones,
+        data = subset_meta_aisa %>% arrange(match(EHI_number,labels(phylo_aisa))),
+        permutations = 999) %>%
+        broom::tidy() %>%
+        tt()
+```
+
+```{r beta_div_pop_aisa_phylo_1, warning=FALSE, comments="", message=FALSE}
+pairwise <- pairwise.adonis(phylo_aisa, subset_meta_aisa$Zones, perm=999)
+pairwise%>%
   tt()
-pairwise_phylo<-pairwise.adonis(beta_div_phylo_aisa_c$S, Aisa_transect_C$Elevation, perm = 999)
-pairwise_phylo%>%
-  tt()
-pairwise_function<-pairwise.adonis(beta_div_func_aisa_c$S, Aisa_transect_C$Elevation, perm = 999)
-pairwise_function%>%
+```
+
+***Functional***
+```{r beta_div_pop_phylo_aisa, warning=FALSE, comments="", message=FALSE}
+func_aisa<-as.matrix(beta_q0n$S)
+func_aisa <- as.dist(func_aisa[rownames(func_aisa) %in% samples_to_keep_aisa,
+               colnames(func_aisa) %in% samples_to_keep_aisa])
+betadisper(func_aisa, subset_meta_aisa$Zones) %>% permutest(., pairwise = TRUE)
+```
+
+```{r beta_richness_permanova_aisa, warning=FALSE, comments="", message=FALSE}
+adonis2(func_aisa ~ Zones,
+        data = subset_meta_aisa %>% arrange(match(EHI_number,labels(func_aisa))),
+        permutations = 999) %>%
+        broom::tidy() %>%
+        tt()
+```
+
+```{r beta_div_pop_aisa_1, warning=FALSE, comments="", message=FALSE}
+pairwise <- pairwise.adonis(func_aisa, subset_meta_aisa$Zones, perm=999)
+pairwise%>%
   tt()
 ```
 
 #### Aran
 
-```{r aran_transect_data_A, eval=FALSE}
-Aran_transect_A<-Aran_transect %>%
-  filter(Elevation=="1000" | Elevation=="1080")
-
-Aran_counts_A <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(Aran_transect_A))]
-identical(sort(colnames(Aran_counts_A)), sort(as.character(rownames(Aran_transect_A))))
-Aran_counts_func_A <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(Aran_transect_A))]
+```{r beta_div_pop_Aran_data, warning=FALSE, comments="", message=FALSE}
+samples_to_keep_Aran <- sample_metadata %>%
+  filter(Transect == "Aran") %>% 
+  filter(Elevation!=1080) %>%
+  filter(Elevation!=1340) %>% 
+  select(EHI_number) %>% 
+  pull()
+subset_meta_Aran <- sample_metadata %>%
+  filter(Transect == "Aran")%>% 
+filter(Elevation!=1080) %>%
+filter(Elevation!=1340) %>% 
+  mutate(Zones = case_when(
+    Transect == "Aran" & Elevation == 1000 ~ "Z0",
+    Transect == "Aran" & Elevation == 1500 ~ "Z1",
+    Transect == "Aran" & Elevation == 1650 ~ "Z2",
+    Transect == "Aran" & Elevation == 1850 ~ "Z3"))
 ```
 
-```{r aran_transect_beta_div_A, eval=FALSE}
-beta_div_richness_aran_a<-hillpair(data=Aran_counts_A, q=0)
-beta_div_neutral_aran_a<-hillpair(data=Aran_counts_A, q=1)
-beta_div_phylo_aran_a<-hillpair(data=Aran_counts_A, q=1, tree=genome_tree)
-beta_div_func_aran_a<-hillpair(data=Aran_counts_func_A, q=1, dist=dist)
+***Richness***
+```{r beta_div_pop_Aran, warning=FALSE, comments="", message=FALSE}
+richness_Aran<-as.matrix(beta_q0n$S)
+richness_Aran <- as.dist(richness_Aran[rownames(richness_Aran) %in% samples_to_keep_Aran,
+               colnames(richness_Aran) %in% samples_to_keep_Aran])
+betadisper(richness_Aran, subset_meta_Aran$Zones) %>% permutest(., pairwise = TRUE)
 ```
 
-```{r aran_transect_pairwise_A, eval=TRUE, results=TRUE}
-pairwise_richness<-pairwise.adonis(beta_div_richness_aran_a$S, Aran_transect_A$Elevation, perm = 999)
-pairwise_richness%>%
-  tt()
-pairwise_neutral<-pairwise.adonis(beta_div_neutral_aran_a$S, Aran_transect_A$Elevation, perm = 999)
-pairwise_neutral%>%
-  tt()
-pairwise_phylo<-pairwise.adonis(beta_div_phylo_aran_a$S, Aran_transect_A$Elevation, perm = 999)
-pairwise_phylo%>%
-  tt()
-pairwise_function<-pairwise.adonis(beta_div_func_aran_a$S, Aran_transect_A$Elevation, perm = 999)
-pairwise_function%>%
-  tt()
+```{r beta_richness_permanova_Aran, warning=FALSE, comments="", message=FALSE}
+adonis2(richness_Aran ~ Zones,
+        data = subset_meta_Aran %>% arrange(match(EHI_number,labels(richness_Aran))),
+        permutations = 999) %>%
+        broom::tidy() %>%
+        tt()
 ```
 
-```{r aran_transect_data_B, eval=FALSE}
-Aran_transect_B<-Aran_transect %>%
-  filter(Elevation=="1080" | Elevation=="1340")
-
-Aran_counts_B <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(Aran_transect_B))]
-identical(sort(colnames(Aran_counts_B)), sort(as.character(rownames(Aran_transect_B))))
-Aran_counts_func_B <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(Aran_transect_B))]
-```
-
-```{r aran_transect_beta_div_B, eval=FALSE}
-beta_div_richness_aran_b<-hillpair(data=Aran_counts_B, q=0)
-beta_div_neutral_aran_b<-hillpair(data=Aran_counts_B, q=1)
-beta_div_phylo_aran_b<-hillpair(data=Aran_counts_B, q=1, tree=genome_tree)
-beta_div_func_aran_b<-hillpair(data=Aran_counts_func_B, q=1, dist=dist)
-```
-
-```{r aran_transect_pairwise_B, eval=TRUE, results=TRUE}
-pairwise_richness<-pairwise.adonis(beta_div_richness_aran_b$S, Aran_transect_B$Elevation, perm = 999)
-pairwise_richness%>%
-  tt()
-pairwise_neutral<-pairwise.adonis(beta_div_neutral_aran_b$S, Aran_transect_B$Elevation, perm = 999)
-pairwise_neutral%>%
-  tt()
-pairwise_phylo<-pairwise.adonis(beta_div_phylo_aran_b$S, Aran_transect_B$Elevation, perm = 999)
-pairwise_phylo%>%
-  tt()
-pairwise_function<-pairwise.adonis(beta_div_func_aran_b$S, Aran_transect_B$Elevation, perm = 999)
-pairwise_function%>%
+```{r beta_div_pop_Aran_1, warning=FALSE, comments="", message=FALSE}
+pairwise <- pairwise.adonis(richness_Aran, subset_meta_Aran$Zones, perm=999)
+pairwise%>%
   tt()
 ```
 
-```{r aran_transect_data_C, eval=FALSE}
-Aran_transect_C<-Aran_transect %>%
-  filter(Elevation=="1340" | Elevation=="1500")
-
-Aran_counts_C <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(Aran_transect_C))]
-identical(sort(colnames(Aran_counts_C)), sort(as.character(rownames(Aran_transect_C))))
-Aran_counts_func_C <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(Aran_transect_C))]
+***Neutral***
+```{r beta_div_pop_neut_Aran, warning=FALSE, comments="", message=FALSE}
+neutral_Aran<-as.matrix(beta_q1n$S)
+neutral_Aran <- as.dist(neutral_Aran[rownames(neutral_Aran) %in% samples_to_keep_Aran,
+               colnames(neutral_Aran) %in% samples_to_keep_Aran])
+betadisper(neutral_Aran, subset_meta_Aran$Zones) %>% permutest(., pairwise = TRUE)
 ```
 
-```{r aran_transect_beta_div_C, eval=FALSE}
-beta_div_richness_aran_c<-hillpair(data=Aran_counts_C, q=0)
-beta_div_neutral_aran_c<-hillpair(data=Aran_counts_C, q=1)
-beta_div_phylo_aran_c<-hillpair(data=Aran_counts_C, q=1, tree=genome_tree)
-beta_div_func_aran_c<-hillpair(data=Aran_counts_func_C, q=1, dist=dist)
+```{r beta_richness_permanova_neut_Aran, warning=FALSE, comments="", message=FALSE}
+adonis2(neutral_Aran ~ Zones,
+        data = subset_meta_Aran %>% arrange(match(EHI_number,labels(neutral_Aran))),
+        permutations = 999) %>%
+        broom::tidy() %>%
+        tt()
 ```
 
-```{r aran_transect_pairwise_C, eval=TRUE, results=TRUE}
-pairwise_richness<-pairwise.adonis(beta_div_richness_aran_c$S, Aran_transect_C$Elevation, perm = 999)
-pairwise_richness%>%
-  tt()
-pairwise_neutral<-pairwise.adonis(beta_div_neutral_aran_c$S, Aran_transect_C$Elevation, perm = 999)
-pairwise_neutral%>%
-  tt()
-pairwise_phylo<-pairwise.adonis(beta_div_phylo_aran_c$S, Aran_transect_C$Elevation, perm = 999)
-pairwise_phylo%>%
-  tt()
-pairwise_function<-pairwise.adonis(beta_div_func_aran_c$S, Aran_transect_C$Elevation, perm = 999)
-pairwise_function%>%
+```{r beta_div_pop_Aran_neut_1, warning=FALSE, comments="", message=FALSE}
+pairwise <- pairwise.adonis(neutral_Aran, subset_meta_Aran$Zones, perm=999)
+pairwise%>%
   tt()
 ```
 
-```{r aran_transect_data_D, eval=FALSE}
-Aran_transect_D<-Aran_transect %>%
-  filter(Elevation=="1500" | Elevation=="1650")
-
-Aran_counts_D <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(Aran_transect_D))]
-identical(sort(colnames(Aran_counts_D)), sort(as.character(rownames(Aran_transect_D))))
-Aran_counts_func_D <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(Aran_transect_D))]
+***Phylogenetic***
+```{r beta_div_pop_phylo_Aran, warning=FALSE, comments="", message=FALSE}
+phylo_Aran<-as.matrix(beta_q1p$S)
+phylo_Aran <- as.dist(phylo_Aran[rownames(phylo_Aran) %in% samples_to_keep_Aran,
+               colnames(phylo_Aran) %in% samples_to_keep_Aran])
+betadisper(phylo_Aran, subset_meta_Aran$Zones) %>% permutest(., pairwise = TRUE)
 ```
 
-```{r aran_transect_beta_div_D, eval=FALSE}
-beta_div_richness_aran_d<-hillpair(data=Aran_counts_D, q=0)
-beta_div_neutral_aran_d<-hillpair(data=Aran_counts_D, q=1)
-beta_div_phylo_aran_d<-hillpair(data=Aran_counts_D, q=1, tree=genome_tree)
-beta_div_func_aran_d<-hillpair(data=Aran_counts_func_D, q=1, dist=dist)
+```{r beta_richness_permanova_phylo_Aran, warning=FALSE, comments="", message=FALSE}
+adonis2(phylo_Aran ~ Zones,
+        data = subset_meta_Aran %>% arrange(match(EHI_number,labels(phylo_Aran))),
+        permutations = 999) %>%
+        broom::tidy() %>%
+        tt()
 ```
 
-```{r aran_transect_pairwise_D, eval=TRUE, results=TRUE}
-pairwise_richness<-pairwise.adonis(beta_div_richness_aran_d$S, Aran_transect_D$Elevation, perm = 999)
-pairwise_richness%>%
-  tt()
-pairwise_neutral<-pairwise.adonis(beta_div_neutral_aran_d$S, Aran_transect_D$Elevation, perm = 999)
-pairwise_neutral%>%
-  tt()
-pairwise_phylo<-pairwise.adonis(beta_div_phylo_aran_d$S, Aran_transect_D$Elevation, perm = 999)
-pairwise_phylo%>%
-  tt()
-pairwise_function<-pairwise.adonis(beta_div_func_aran_d$S, Aran_transect_D$Elevation, perm = 999)
-pairwise_function%>%
+```{r beta_div_pop_Aran_phylo_1, warning=FALSE, comments="", message=FALSE}
+pairwise <- pairwise.adonis(phylo_Aran, subset_meta_Aran$Zones, perm=999)
+pairwise%>%
   tt()
 ```
 
-```{r aran_transect_data_E, eval=FALSE}
-Aran_transect_E<-Aran_transect %>%
-  filter(Elevation=="1650" | Elevation=="1850")
-
-Aran_counts_E <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(Aran_transect_E))]
-identical(sort(colnames(Aran_counts_E)), sort(as.character(rownames(Aran_transect_E))))
-Aran_counts_func_E <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(Aran_transect_E))]
+***Functional***
+```{r beta_div_pop_phylo_Aran, warning=FALSE, comments="", message=FALSE}
+func_Aran<-as.matrix(beta_q0n$S)
+func_Aran <- as.dist(func_Aran[rownames(func_Aran) %in% samples_to_keep_Aran,
+               colnames(func_Aran) %in% samples_to_keep_Aran])
+betadisper(func_Aran, subset_meta_Aran$Zones) %>% permutest(., pairwise = TRUE)
 ```
 
-```{r aran_transect_beta_div_E, eval=FALSE}
-beta_div_richness_aran_e<-hillpair(data=Aran_counts_E, q=0)
-beta_div_neutral_aran_e<-hillpair(data=Aran_counts_E, q=1)
-beta_div_phylo_aran_e<-hillpair(data=Aran_counts_E, q=1, tree=genome_tree)
-beta_div_func_aran_e<-hillpair(data=Aran_counts_func_E, q=1, dist=dist)
+```{r beta_richness_permanova_Aran, warning=FALSE, comments="", message=FALSE}
+adonis2(func_Aran ~ Zones,
+        data = subset_meta_Aran %>% arrange(match(EHI_number,labels(func_Aran))),
+        permutations = 999) %>%
+        broom::tidy() %>%
+        tt()
 ```
 
-```{r aran_transect_pairwise_E, eval=TRUE, results=TRUE}
-pairwise_richness<-pairwise.adonis(beta_div_richness_aran_e$S, Aran_transect_E$Elevation, perm = 999)
-pairwise_richness%>%
-  tt()
-pairwise_neutral<-pairwise.adonis(beta_div_neutral_aran_e$S, Aran_transect_E$Elevation, perm = 999)
-pairwise_neutral%>%
-  tt()
-pairwise_phylo<-pairwise.adonis(beta_div_phylo_aran_e$S, Aran_transect_E$Elevation, perm = 999)
-pairwise_phylo%>%
-  tt()
-pairwise_function<-pairwise.adonis(beta_div_func_aran_e$S, Aran_transect_E$Elevation, perm = 999)
-pairwise_function%>%
+```{r beta_div_pop_Aran_1, warning=FALSE, comments="", message=FALSE}
+pairwise <- pairwise.adonis(func_Aran, subset_meta_Aran$Zones, perm=999)
+pairwise%>%
   tt()
 ```
 
 #### Sentein
 
-```{r sentein_transect_data_A, eval=FALSE}
-sentein_transect_A<-sentein_transect %>%
-  filter(Elevation=="941" | Elevation=="1260")
-
-sentein_counts_A <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(sentein_transect_A))]
-identical(sort(colnames(sentein_counts_A)), sort(as.character(rownames(sentein_transect_A))))
-sentein_counts_func_A <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(sentein_transect_A))]
+```{r beta_div_pop_Sentein_data, warning=FALSE, comments="", message=FALSE}
+samples_to_keep_Sentein <- sample_metadata %>%
+  filter(Transect == "Sentein") %>% 
+  select(EHI_number) %>% 
+  pull()
+subset_meta_Sentein <- sample_metadata %>%
+  filter(Transect == "Sentein")%>% 
+  mutate(Zones = case_when(
+    Transect == "Sentein" & Elevation == 941 ~ "Z0",
+    Transect == "Sentein" & Elevation == 1260 ~ "Z1",
+    Transect == "Sentein" & Elevation == 1628 ~ "Z2",
+    Transect == "Sentein" & Elevation == 1873 ~ "Z3"))
 ```
 
-```{r sentein_transect_beta_div_A, eval=FALSE}
-beta_div_richness_sentein_a<-hillpair(data=sentein_counts_A, q=0)
-beta_div_neutral_sentein_a<-hillpair(data=sentein_counts_A, q=1)
-beta_div_phylo_sentein_a<-hillpair(data=sentein_counts_A, q=1, tree=genome_tree)
-beta_div_func_sentein_a<-hillpair(data=sentein_counts_func_A, q=1, dist=dist)
+***Richness***
+```{r beta_div_pop_Sentein, warning=FALSE, comments="", message=FALSE}
+richness_Sentein<-as.matrix(beta_q0n$S)
+richness_Sentein <- as.dist(richness_Sentein[rownames(richness_Sentein) %in% samples_to_keep_Sentein,
+               colnames(richness_Sentein) %in% samples_to_keep_Sentein])
+betadisper(richness_Sentein, subset_meta_Sentein$Zones) %>% permutest(., pairwise = TRUE)
 ```
 
-```{r sentein_transect_pairwise_A, eval=TRUE, results=TRUE}
-pairwise_richness<-pairwise.adonis(beta_div_richness_sentein_a$S, sentein_transect_A$Elevation, perm = 999)
-pairwise_richness%>%
-  tt()
-pairwise_neutral<-pairwise.adonis(beta_div_neutral_sentein_a$S, sentein_transect_A$Elevation, perm = 999)
-pairwise_neutral%>%
-  tt()
-pairwise_phylo<-pairwise.adonis(beta_div_phylo_sentein_a$S, sentein_transect_A$Elevation, perm = 999)
-pairwise_phylo%>%
-  tt()
-pairwise_function<-pairwise.adonis(beta_div_func_sentein_a$S, sentein_transect_A$Elevation, perm = 999)
-pairwise_function%>%
-  tt()
+```{r beta_richness_permanova_Sentein, warning=FALSE, comments="", message=FALSE}
+adonis2(richness_Sentein ~ Zones,
+        data = subset_meta_Sentein %>% arrange(match(EHI_number,labels(richness_Sentein))),
+        permutations = 999) %>%
+        broom::tidy() %>%
+        tt()
 ```
 
-```{r sentein_transect_data_B, eval=FALSE}
-sentein_transect_B<-sentein_transect %>%
-  filter(Elevation=="1260" | Elevation=="1628")
-
-sentein_counts_B <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(sentein_transect_B))]
-identical(sort(colnames(sentein_counts_B)), sort(as.character(rownames(sentein_transect_B))))
-sentein_counts_func_B <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(sentein_transect_B))]
-```
-
-```{r sentein_transect_beta_div_B, eval=FALSE}
-beta_div_richness_sentein_b<-hillpair(data=sentein_counts_B, q=0)
-beta_div_neutral_sentein_b<-hillpair(data=sentein_counts_B, q=1)
-beta_div_phylo_sentein_b<-hillpair(data=sentein_counts_B, q=1, tree=genome_tree)
-beta_div_func_sentein_b<-hillpair(data=sentein_counts_func_B, q=1, dist=dist)
-```
-
-```{r sentein_transect_pairwise_B, eval=TRUE, results=TRUE}
-pairwise_richness<-pairwise.adonis(beta_div_richness_sentein_b$S, sentein_transect_B$Elevation, perm = 999)
-pairwise_richness%>%
-  tt()
-pairwise_neutral<-pairwise.adonis(beta_div_neutral_sentein_b$S, sentein_transect_B$Elevation, perm = 999)
-pairwise_neutral%>%
-  tt()
-pairwise_phylo<-pairwise.adonis(beta_div_phylo_sentein_b$S, sentein_transect_B$Elevation, perm = 999)
-pairwise_phylo%>%
-  tt()
-pairwise_function<-pairwise.adonis(beta_div_func_sentein_b$S, sentein_transect_B$Elevation, perm = 999)
-pairwise_function%>%
+```{r beta_div_pop_Sentein_1, warning=FALSE, comments="", message=FALSE}
+pairwise <- pairwise.adonis(richness_Sentein, subset_meta_Sentein$Zones, perm=999)
+pairwise%>%
   tt()
 ```
 
-```{r sentein_transect_data_C, eval=FALSE}
-sentein_transect_C<-sentein_transect %>%
-  filter(Elevation=="1628" | Elevation=="1873")
-
-sentein_counts_C <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(sentein_transect_C))]
-identical(sort(colnames(sentein_counts_C)), sort(as.character(rownames(sentein_transect_C))))
-sentein_counts_func_C <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(sentein_transect_C))]
+***Neutral***
+```{r beta_div_pop_neut_Sentein, warning=FALSE, comments="", message=FALSE}
+neutral_Sentein<-as.matrix(beta_q1n$S)
+neutral_Sentein <- as.dist(neutral_Sentein[rownames(neutral_Sentein) %in% samples_to_keep_Sentein,
+               colnames(neutral_Sentein) %in% samples_to_keep_Sentein])
+betadisper(neutral_Sentein, subset_meta_Sentein$Zones) %>% permutest(., pairwise = TRUE)
 ```
 
-```{r sentein_transect_beta_div_C, eval=FALSE}
-beta_div_richness_sentein_c<-hillpair(data=sentein_counts_C, q=0)
-beta_div_neutral_sentein_c<-hillpair(data=sentein_counts_C, q=1)
-beta_div_phylo_sentein_c<-hillpair(data=sentein_counts_C, q=1, tree=genome_tree)
-beta_div_func_sentein_c<-hillpair(data=sentein_counts_func_C, q=1, dist=dist)
+```{r beta_richness_permanova_neut_Sentein, warning=FALSE, comments="", message=FALSE}
+adonis2(neutral_Sentein ~ Zones,
+        data = subset_meta_Sentein %>% arrange(match(EHI_number,labels(neutral_Sentein))),
+        permutations = 999) %>%
+        broom::tidy() %>%
+        tt()
 ```
 
-```{r sentein_transect_pairwise_C, eval=TRUE, results=TRUE}
-pairwise_richness<-pairwise.adonis(beta_div_richness_sentein_c$S, sentein_transect_C$Elevation, perm = 999)
-pairwise_richness%>%
-  tt()
-pairwise_neutral<-pairwise.adonis(beta_div_neutral_sentein_c$S, sentein_transect_C$Elevation, perm = 999)
-pairwise_neutral%>%
-  tt()
-pairwise_phylo<-pairwise.adonis(beta_div_phylo_sentein_c$S, sentein_transect_C$Elevation, perm = 999)
-pairwise_phylo%>%
-  tt()
-pairwise_function<-pairwise.adonis(beta_div_func_sentein_c$S, sentein_transect_C$Elevation, perm = 999)
-pairwise_function%>%
+```{r beta_div_pop_Sentein_neut_1, warning=FALSE, comments="", message=FALSE}
+pairwise <- pairwise.adonis(neutral_Sentein, subset_meta_Sentein$Zones, perm=999)
+pairwise%>%
   tt()
 ```
 
-#### Tourmalet
-
-```{r tourmalet_transect_data_A, eval=FALSE}
-tourmalet_transect_A<-tourmalet_transect %>%
-  filter(Elevation=="953" | Elevation=="1255")
-
-tourmalet_counts_A <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(tourmalet_transect_A))]
-identical(sort(colnames(tourmalet_counts_A)), sort(as.character(rownames(tourmalet_transect_A))))
-tourmalet_counts_func_A <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(tourmalet_transect_A))]
+***Phylogenetic***
+```{r beta_div_pop_phylo_Sentein, warning=FALSE, comments="", message=FALSE}
+phylo_Sentein<-as.matrix(beta_q1p$S)
+phylo_Sentein <- as.dist(phylo_Sentein[rownames(phylo_Sentein) %in% samples_to_keep_Sentein,
+               colnames(phylo_Sentein) %in% samples_to_keep_Sentein])
+betadisper(phylo_Sentein, subset_meta_Sentein$Zones) %>% permutest(., pairwise = TRUE)
 ```
 
-```{r tourmalet_transect_beta_div_A, eval=FALSE}
-beta_div_richness_tourmalet_a<-hillpair(data=tourmalet_counts_A, q=0)
-beta_div_neutral_tourmalet_a<-hillpair(data=tourmalet_counts_A, q=1)
-beta_div_phylo_tourmalet_a<-hillpair(data=tourmalet_counts_A, q=1, tree=genome_tree)
-beta_div_func_tourmalet_a<-hillpair(data=tourmalet_counts_func_A, q=1, dist=dist)
+```{r beta_richness_permanova_phylo_Sentein, warning=FALSE, comments="", message=FALSE}
+adonis2(phylo_Sentein ~ Zones,
+        data = subset_meta_Sentein %>% arrange(match(EHI_number,labels(phylo_Sentein))),
+        permutations = 999) %>%
+        broom::tidy() %>%
+        tt()
 ```
 
-```{r tourmalet_transect_pairwise_A, eval=TRUE, results=TRUE}
-pairwise_richness<-pairwise.adonis(beta_div_richness_tourmalet_a$S, tourmalet_transect_A$Elevation, perm = 999)
-pairwise_richness%>%
-  tt()
-pairwise_neutral<-pairwise.adonis(beta_div_neutral_tourmalet_a$S, tourmalet_transect_A$Elevation, perm = 999)
-pairwise_neutral%>%
-  tt()
-pairwise_phylo<-pairwise.adonis(beta_div_phylo_tourmalet_a$S, tourmalet_transect_A$Elevation, perm = 999)
-pairwise_phylo%>%
-  tt()
-pairwise_function<-pairwise.adonis(beta_div_func_tourmalet_a$S, tourmalet_transect_A$Elevation, perm = 999)
-pairwise_function%>%
+```{r beta_div_pop_Sentein_phylo_1, warning=FALSE, comments="", message=FALSE}
+pairwise <- pairwise.adonis(phylo_Sentein, subset_meta_Sentein$Zones, perm=999)
+pairwise%>%
   tt()
 ```
 
-```{r tourmalet_transect_data_B, eval=FALSE}
-tourmalet_transect_B<-tourmalet_transect %>%
-  filter(Elevation=="1255" | Elevation=="1561")
-
-tourmalet_counts_B <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(tourmalet_transect_B))]
-identical(sort(colnames(tourmalet_counts_B)), sort(as.character(rownames(tourmalet_transect_B))))
-tourmalet_counts_func_B <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(tourmalet_transect_B))]
+***Functional***
+```{r beta_div_pop_phylo_Sentein, warning=FALSE, comments="", message=FALSE}
+func_Sentein<-as.matrix(beta_q0n$S)
+func_Sentein <- as.dist(func_Sentein[rownames(func_Sentein) %in% samples_to_keep_Sentein,
+               colnames(func_Sentein) %in% samples_to_keep_Sentein])
+betadisper(func_Sentein, subset_meta_Sentein$Zones) %>% permutest(., pairwise = TRUE)
 ```
 
-```{r tourmalet_transect_beta_div_B, eval=FALSE}
-beta_div_richness_tourmalet_b<-hillpair(data=tourmalet_counts_B, q=0)
-beta_div_neutral_tourmalet_b<-hillpair(data=tourmalet_counts_B, q=1)
-beta_div_phylo_tourmalet_b<-hillpair(data=tourmalet_counts_B, q=1, tree=genome_tree)
-beta_div_func_tourmalet_b<-hillpair(data=tourmalet_counts_func_B, q=1, dist=dist)
+```{r beta_richness_permanova_Sentein, warning=FALSE, comments="", message=FALSE}
+adonis2(func_Sentein ~ Zones,
+        data = subset_meta_Sentein %>% arrange(match(EHI_number,labels(func_Sentein))),
+        permutations = 999) %>%
+        broom::tidy() %>%
+        tt()
 ```
 
-```{r tourmalet_transect_pairwise_B, eval=TRUE, results=TRUE}
-pairwise_richness<-pairwise.adonis(beta_div_richness_tourmalet_b$S, tourmalet_transect_B$Elevation, perm = 999)
-pairwise_richness%>%
+```{r beta_div_pop_Sentein_1, warning=FALSE, comments="", message=FALSE}
+pairwise <- pairwise.adonis(func_Sentein, subset_meta_Sentein$Zones, perm=999)
+pairwise%>%
   tt()
-pairwise_neutral<-pairwise.adonis(beta_div_neutral_tourmalet_b$S, tourmalet_transect_B$Elevation, perm = 999)
-pairwise_neutral%>%
-  tt()
-pairwise_phylo<-pairwise.adonis(beta_div_phylo_tourmalet_b$S, tourmalet_transect_B$Elevation, perm = 999)
-pairwise_phylo%>%
-  tt()
-pairwise_function<-pairwise.adonis(beta_div_func_tourmalet_b$S, tourmalet_transect_B$Elevation, perm = 999)
-pairwise_function%>%
-  tt()
-```
-
-```{r tourmalet_transect_data_C, eval=FALSE}
-tourmalet_transect_C<-tourmalet_transect %>%
-  filter(Elevation=="1561" | Elevation=="1797")
-
-tourmalet_counts_C <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(tourmalet_transect_C))]
-identical(sort(colnames(tourmalet_counts_C)), sort(as.character(rownames(tourmalet_transect_C))))
-tourmalet_counts_func_C <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(tourmalet_transect_C))]
-```
-
-```{r tourmalet_transect_beta_div_C, eval=FALSE}
-beta_div_richness_tourmalet_c<-hillpair(data=tourmalet_counts_C, q=0)
-beta_div_neutral_tourmalet_c<-hillpair(data=tourmalet_counts_C, q=1)
-beta_div_phylo_tourmalet_c<-hillpair(data=tourmalet_counts_C, q=1, tree=genome_tree)
-beta_div_func_tourmalet_c<-hillpair(data=tourmalet_counts_func_C, q=1, dist=dist)
-```
-
-```{r tourmalet_transect_pairwise_C, eval=TRUE, results=TRUE}
-pairwise_richness<-pairwise.adonis(beta_div_richness_tourmalet_c$S, tourmalet_transect_C$Elevation, perm = 999)
-pairwise_richness%>%
-  tt()
-pairwise_neutral<-pairwise.adonis(beta_div_neutral_tourmalet_c$S, tourmalet_transect_C$Elevation, perm = 999)
-pairwise_neutral%>%
-  tt()
-pairwise_phylo<-pairwise.adonis(beta_div_phylo_tourmalet_c$S, tourmalet_transect_C$Elevation, perm = 999)
-pairwise_phylo%>%
-  tt()
-pairwise_function<-pairwise.adonis(beta_div_func_tourmalet_c$S, tourmalet_transect_C$Elevation, perm = 999)
-pairwise_function%>%
-  tt()
-```
-
-```{r tourmalet_transect_data_D, eval=FALSE}
-tourmalet_transect_D<-tourmalet_transect %>%
-  filter(Elevation=="1797" | Elevation=="2065"| Elevation=="2134")
-
-tourmalet_counts_D <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(tourmalet_transect_D))]
-identical(sort(colnames(tourmalet_counts_D)), sort(as.character(rownames(tourmalet_transect_D))))
-tourmalet_counts_func_D <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(tourmalet_transect_D))]
-```
-
-```{r tourmalet_transect_beta_div_D, eval=FALSE}
-beta_div_richness_tourmalet_d<-hillpair(data=tourmalet_counts_D, q=0)
-beta_div_neutral_tourmalet_d<-hillpair(data=tourmalet_counts_D, q=1)
-beta_div_phylo_tourmalet_d<-hillpair(data=tourmalet_counts_D, q=1, tree=genome_tree)
-beta_div_func_tourmalet_d<-hillpair(data=tourmalet_counts_func_D, q=1, dist=dist)
-```
-
-```{r tourmalet_transect_pairwise_D, eval=TRUE, results=TRUE, warning=FALSE, comment=FALSE}
-pairwise_richness<-pairwise.adonis(beta_div_richness_tourmalet_d$S, tourmalet_transect_D$Elevation, perm = 999)
-pairwise_richness%>%
-  tt()
-pairwise_neutral<-pairwise.adonis(beta_div_neutral_tourmalet_d$S, tourmalet_transect_D$Elevation, perm = 999)
-pairwise_neutral%>%
-  tt()
-pairwise_phylo<-pairwise.adonis(beta_div_phylo_tourmalet_d$S, tourmalet_transect_D$Elevation, perm = 999)
-pairwise_phylo%>%
-  tt()
-pairwise_function<-pairwise.adonis(beta_div_func_tourmalet_d$S, tourmalet_transect_D$Elevation, perm = 999)
-pairwise_function%>%
-  tt()
-```
-
-```{r tourmalet_transect_data_E, eval=FALSE}
-tourmalet_transect_E<-tourmalet_transect %>%
-  filter(Elevation=="2065"| Elevation=="2134"| Elevation=="2306")
-
-tourmalet_counts_E <- temp_genome_counts[, which(colnames(temp_genome_counts) %in% rownames(tourmalet_transect_E))]
-identical(sort(colnames(tourmalet_counts_E)), sort(as.character(rownames(tourmalet_transect_E))))
-tourmalet_counts_func_E <- temp_genome_counts_func[, which(colnames(temp_genome_counts_func) %in% rownames(tourmalet_transect_E))]
-```
-
-```{r tourmalet_transect_beta_div_E, eval=FALSE}
-beta_div_richness_tourmalet_e<-hillpair(data=tourmalet_counts_E, q=0)
-beta_div_neutral_tourmalet_e<-hillpair(data=tourmalet_counts_E, q=1)
-beta_div_phylo_tourmalet_e<-hillpair(data=tourmalet_counts_E, q=1, tree=genome_tree)
-beta_div_func_tourmalet_e<-hillpair(data=tourmalet_counts_func_E, q=1, dist=dist)
-```
-
-```{r tourmalet_transect_pairwise_E, eval=TRUE, results=TRUE}
-pairwise_richness<-pairwise.adonis(beta_div_richness_tourmalet_e$S, tourmalet_transect_E$Elevation, perm = 999)
-pairwise_richness%>%
-  tt()
-pairwise_neutral<-pairwise.adonis(beta_div_neutral_tourmalet_e$S, tourmalet_transect_E$Elevation, perm = 999)
-pairwise_neutral%>%
-  tt()
-pairwise_phylo<-pairwise.adonis(beta_div_phylo_tourmalet_e$S, tourmalet_transect_E$Elevation, perm = 999)
-pairwise_phylo%>%
-  tt()
-pairwise_function<-pairwise.adonis(beta_div_func_tourmalet_e$S, tourmalet_transect_E$Elevation, perm = 999)
-pairwise_function%>%
-  tt()
-```
-
-
-### Beta diversity per transect (calculated from population)
-#### Aisa
-
-```{r aisa_mean, eval=FALSE}
-
-Aisa_transect<-tibble::rownames_to_column(Aisa_transect, var = "sample")
-Aisa_counts<-tibble::rownames_to_column(Aisa_counts, var = "genome")
-
-
-richness_beta_aisa <- Aisa_counts %>%
-  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
-  left_join(Aisa_transect, by = join_by(sample == sample)) %>%
-  mutate(Elevation=factor(Elevation)) %>% 
-  group_by(Elevation) %>% 
-  group_split() %>% 
-  map_dbl(., ~ .x %>%
-            select(genome, sample, counts) %>%
-            pivot_wider(names_from = sample, values_from = counts) %>%
-            column_to_rownames(var = "genome") %>%
-            tss() %>%
-            as.data.frame() %>%
-            hilldiss(data=., metric="S", q = 0)
-  )
-
-richness_beta_aisa <- Aisa_counts %>%
-  pivot_longer(!genome, names_to = "sample", values_to = "counts") %>%
-  left_join(Aisa_transect, by = join_by(sample == sample)) %>%
-  mutate(Elevation = factor(Elevation)) %>%
-  group_by(Elevation) %>%
-  group_split() %>%
-  map(., ~ .x %>%
-        select(genome, sample, counts) %>%
-        pivot_wider(names_from = sample, values_from = counts) %>%
-        column_to_rownames(var = "genome") %>%
-        tss() %>%
-        as.data.frame() %>%
-        hilldiss(data = ., metric = "S", q = 0)) %>%
-  do.call(cbind, .)
-
-
-names(richness_beta_aisa)  <- unique(Aisa_transect$Elevation) %>% sort()
-
-neutral_beta_aisa <- Aisa_counts %>%
-  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
-  left_join(Aisa_transect, by = join_by(sample == sample)) %>%
-  mutate(Elevation=factor(Elevation)) %>% 
-  group_by(Elevation) %>% 
-  group_split() %>% 
-  map_dbl(., ~ .x %>%
-            select(genome, sample, counts) %>%
-            pivot_wider(names_from = sample, values_from = counts) %>%
-            column_to_rownames(var = "genome") %>%
-            tss() %>%
-            as.data.frame() %>%
-            hilldiss(data=., metric="S", q = 1)
-  )
-
-names(neutral_beta_aisa)  <- unique(Aisa_transect$Elevation) %>% sort()
-
-phylo_beta_aisa <- Aisa_counts %>%
-  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
-  left_join(Aisa_transect, by = join_by(sample == sample)) %>%
-  mutate(Elevation=factor(Elevation)) %>% 
-  group_by(Elevation) %>% 
-  group_split() %>% 
-  map_dbl(., ~ .x %>%
-            select(genome, sample, counts) %>%
-            pivot_wider(names_from = sample, values_from = counts) %>%
-            column_to_rownames(var = "genome") %>%
-            tss() %>%
-            as.data.frame() %>%
-            hilldiss(data=., metric="S", q = 1, tree=genome_tree)
-  )
-
-names(phylo_beta_aisa)  <- unique(Aisa_transect$Elevation) %>% sort()
-
-Aisa_counts_func<-tibble::rownames_to_column(Aisa_counts_func, var = "genome")
-
-func_beta_aisa <- Aisa_counts_func %>%
-  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
-  left_join(Aisa_transect, by = join_by(sample == sample)) %>%
-  mutate(Elevation=factor(Elevation)) %>% 
-  group_by(Elevation) %>% 
-  group_split() %>% 
-  map_dbl(., ~ .x %>%
-            select(genome, sample, counts) %>%
-            pivot_wider(names_from = sample, values_from = counts) %>%
-            column_to_rownames(var = "genome") %>%
-            tss() %>%
-            as.data.frame() %>%
-            hilldiss(data=., metric="S", q = 1, dist=dist)
-  )
-
-names(func_beta_aisa)  <- unique(Aisa_transect$Elevation) %>% sort()
-```
-
-
-```{r aisa_mean_1, eval=TRUE, results=TRUE}
-# Merge all metrics
-beta_div_aisa <- bind_rows(richness_beta_aisa,neutral_beta_aisa,phylo_beta_aisa,func_beta_aisa) %>%
-  t() %>% 
-  as.data.frame() %>% 
-  rownames_to_column(var="Elevation") %>% 
-  as_tibble() %>% 
-  rename("richness"=V1,"neutral"=V2,"phylogenetic"=V3,"functional"=V4)
-```
-
-
-#### Aran
-
-```{r aran_mean, eval=FALSE}
-aran_transect<-tibble::rownames_to_column(Aran_transect, var = "sample")
-aran_counts<-tibble::rownames_to_column(Aran_counts, var = "genome")
-
-richness_beta_aran <- aran_counts %>%
-  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
-  left_join(aran_transect, by = join_by(sample == sample)) %>%
-  mutate(Elevation=factor(Elevation)) %>% 
-  group_by(Elevation) %>% 
-  group_split() %>% 
-  map_dbl(., ~ .x %>%
-            select(genome, sample, counts) %>%
-            pivot_wider(names_from = sample, values_from = counts) %>%
-            column_to_rownames(var = "genome") %>%
-            tss() %>%
-            as.data.frame() %>%
-            hilldiss(data=., metric="S", q = 0)
-  )
-
-names(richness_beta_aran)  <- unique(aran_transect$Elevation) %>% sort()
-
-neutral_beta_aran <- aran_counts %>%
-  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
-  left_join(aran_transect, by = join_by(sample == sample)) %>%
-  mutate(Elevation=factor(Elevation)) %>% 
-  group_by(Elevation) %>% 
-  group_split() %>% 
-  map_dbl(., ~ .x %>%
-            select(genome, sample, counts) %>%
-            pivot_wider(names_from = sample, values_from = counts) %>%
-            column_to_rownames(var = "genome") %>%
-            tss() %>%
-            as.data.frame() %>%
-            hilldiss(data=., metric="S", q = 1)
-  )
-
-names(neutral_beta_aran)  <- unique(aran_transect$Elevation) %>% sort()
-
-phylo_beta_aran <- aran_counts %>%
-  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
-  left_join(aran_transect, by = join_by(sample == sample)) %>%
-  mutate(Elevation=factor(Elevation)) %>% 
-  group_by(Elevation) %>% 
-  group_split() %>% 
-  map_dbl(., ~ .x %>%
-            select(genome, sample, counts) %>%
-            pivot_wider(names_from = sample, values_from = counts) %>%
-            column_to_rownames(var = "genome") %>%
-            tss() %>%
-            as.data.frame() %>%
-            hilldiss(data=., metric="S", q = 1, tree=genome_tree)
-  )
-
-names(phylo_beta_aran)  <- unique(aran_transect$Elevation) %>% sort()
-
-aran_counts_func<-tibble::rownames_to_column(Aran_counts_func, var = "genome")
-
-func_beta_aran <- aran_counts_func %>%
-  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
-  left_join(aran_transect, by = join_by(sample == sample)) %>%
-  mutate(Elevation=factor(Elevation)) %>% 
-  group_by(Elevation) %>% 
-  group_split() %>% 
-  map_dbl(., ~ .x %>%
-            select(genome, sample, counts) %>%
-            pivot_wider(names_from = sample, values_from = counts) %>%
-            column_to_rownames(var = "genome") %>%
-            tss() %>%
-            as.data.frame() %>%
-            hilldiss(data=., metric="S", q = 1, dist=dist)
-  )
-
-names(func_beta_aran)  <- unique(aran_transect$Elevation) %>% sort()
-```
-
-```{r aran_mean_1, eval=TRUE, results=TRUE}
-# Merge all metrics
-beta_div_aran <- bind_rows(richness_beta_aran,neutral_beta_aran,phylo_beta_aran,func_beta_aran) %>%
-  t() %>% 
-  as.data.frame() %>% 
-  rownames_to_column(var="Elevation") %>% 
-  as_tibble() %>% 
-  rename("richness"=V1,"neutral"=V2,"phylogenetic"=V3,"functional"=V4)
-```
-
-#### Sentein
-
-```{r sentein_mean, eval=FALSE}
-sentein_transect<-tibble::rownames_to_column(sentein_transect, var = "sample")
-sentein_counts<-tibble::rownames_to_column(sentein_counts, var = "genome")
-
-
-richness_beta_sentein <- sentein_counts %>%
-  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
-  left_join(sentein_transect, by = join_by(sample == sample)) %>%
-  mutate(Elevation=factor(Elevation)) %>% 
-  group_by(Elevation) %>% 
-  group_split() %>% 
-  map_dbl(., ~ .x %>%
-            select(genome, sample, counts) %>%
-            pivot_wider(names_from = sample, values_from = counts) %>%
-            column_to_rownames(var = "genome") %>%
-            tss() %>%
-            as.data.frame() %>%
-            hilldiss(data=., metric="S", q = 0)
-  )
-
-
-names(richness_beta_sentein)  <- unique(sentein_transect$Elevation) %>% sort()
-
-neutral_beta_sentein <- sentein_counts %>%
-  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
-  left_join(sentein_transect, by = join_by(sample == sample)) %>%
-  mutate(Elevation=factor(Elevation)) %>% 
-  group_by(Elevation) %>% 
-  group_split() %>% 
-  map_dbl(., ~ .x %>%
-            select(genome, sample, counts) %>%
-            pivot_wider(names_from = sample, values_from = counts) %>%
-            column_to_rownames(var = "genome") %>%
-            tss() %>%
-            as.data.frame() %>%
-            hilldiss(data=., metric="S", q = 1)
-  )
-
-names(neutral_beta_sentein)  <- unique(sentein_transect$Elevation) %>% sort()
-
-phylo_beta_sentein <- sentein_counts %>%
-  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
-  left_join(sentein_transect, by = join_by(sample == sample)) %>%
-  mutate(Elevation=factor(Elevation)) %>% 
-  group_by(Elevation) %>% 
-  group_split() %>% 
-  map_dbl(., ~ .x %>%
-            select(genome, sample, counts) %>%
-            pivot_wider(names_from = sample, values_from = counts) %>%
-            column_to_rownames(var = "genome") %>%
-            tss() %>%
-            as.data.frame() %>%
-            hilldiss(data=., metric="S", q = 1, tree=genome_tree)
-  )
-
-names(phylo_beta_sentein)  <- unique(sentein_transect$Elevation) %>% sort()
-
-sentein_counts_func<-tibble::rownames_to_column(sentein_counts_func, var = "genome")
-
-func_beta_sentein <- sentein_counts_func %>%
-  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
-  left_join(sentein_transect, by = join_by(sample == sample)) %>%
-  mutate(Elevation=factor(Elevation)) %>% 
-  group_by(Elevation) %>% 
-  group_split() %>% 
-  map_dbl(., ~ .x %>%
-            select(genome, sample, counts) %>%
-            pivot_wider(names_from = sample, values_from = counts) %>%
-            column_to_rownames(var = "genome") %>%
-            tss() %>%
-            as.data.frame() %>%
-            hilldiss(data=., metric="S", q = 1, dist=dist)
-  )
-
-names(func_beta_sentein)  <- unique(sentein_transect$Elevation) %>% sort()
-```
-
-
-```{r sentein_mean_1, eval=TRUE, results=TRUE}
-# Merge all metrics
-beta_div_sentein <- bind_rows(richness_beta_sentein,neutral_beta_sentein,phylo_beta_sentein,func_beta_sentein) %>%
-  t() %>% 
-  as.data.frame() %>% 
-  rownames_to_column(var="Elevation") %>% 
-  as_tibble() %>% 
-  rename("richness"=V1,"neutral"=V2,"phylogenetic"=V3,"functional"=V4)
 ```
 
 #### Tourmalet
 
-```{r tourmalet_mean, eval=FALSE}
-tourmalet_transect<-tibble::rownames_to_column(tourmalet_transect, var = "sample")
-tourmalet_counts<-tibble::rownames_to_column(tourmalet_counts, var = "genome")
-
-
-richness_beta_tourmalet <- tourmalet_counts %>%
-  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
-  left_join(tourmalet_transect, by = join_by(sample == sample)) %>%
-  mutate(Elevation=factor(Elevation)) %>% 
-  group_by(Elevation) %>% 
-  group_split() %>% 
-  map_dbl(., ~ .x %>%
-            select(genome, sample, counts) %>%
-            pivot_wider(names_from = sample, values_from = counts) %>%
-            column_to_rownames(var = "genome") %>%
-            tss() %>%
-            as.data.frame() %>%
-            hilldiss(data=., metric="S", q = 0)
-  )
-
-names(richness_beta_tourmalet)  <- unique(tourmalet_transect$Elevation) %>% sort()
-
-neutral_beta_tourmalet <- tourmalet_counts %>%
-  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
-  left_join(tourmalet_transect, by = join_by(sample == sample)) %>%
-  mutate(Elevation=factor(Elevation)) %>% 
-  group_by(Elevation) %>% 
-  group_split() %>% 
-  map_dbl(., ~ .x %>%
-            select(genome, sample, counts) %>%
-            pivot_wider(names_from = sample, values_from = counts) %>%
-            column_to_rownames(var = "genome") %>%
-            tss() %>%
-            as.data.frame() %>%
-            hilldiss(data=., metric="S", q = 1)
-  )
-
-names(neutral_beta_tourmalet)  <- unique(tourmalet_transect$Elevation) %>% sort()
-
-phylo_beta_tourmalet <- tourmalet_counts %>%
-  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
-  left_join(tourmalet_transect, by = join_by(sample == sample)) %>%
-  mutate(Elevation=factor(Elevation)) %>% 
-  group_by(Elevation) %>% 
-  group_split() %>% 
-  map_dbl(., ~ .x %>%
-            select(genome, sample, counts) %>%
-            pivot_wider(names_from = sample, values_from = counts) %>%
-            column_to_rownames(var = "genome") %>%
-            tss() %>%
-            as.data.frame() %>%
-            hilldiss(data=., metric="S", q = 1, tree=genome_tree)
-  )
-
-names(phylo_beta_tourmalet)  <- unique(tourmalet_transect$Elevation) %>% sort()
-
-tourmalet_counts_func<-tibble::rownames_to_column(tourmalet_counts_func, var = "genome")
-
-func_beta_tourmalet <- tourmalet_counts_func %>%
-  pivot_longer(!genome,names_to="sample",values_to = "counts") %>%
-  left_join(tourmalet_transect, by = join_by(sample == sample)) %>%
-  mutate(Elevation=factor(Elevation)) %>% 
-  group_by(Elevation) %>% 
-  group_split() %>% 
-  map_dbl(., ~ .x %>%
-            select(genome, sample, counts) %>%
-            pivot_wider(names_from = sample, values_from = counts) %>%
-            column_to_rownames(var = "genome") %>%
-            tss() %>%
-            as.data.frame() %>%
-            hilldiss(data=., metric="S", q = 1, dist=dist)
-  )
-
-names(func_beta_tourmalet)  <- unique(tourmalet_transect$Elevation) %>% sort()
+```{r beta_div_pop_Tourmalet_data, warning=FALSE, comments="", message=FALSE}
+samples_to_keep_Tourmalet <- sample_metadata %>%
+  filter(Transect == "Tourmalet") %>% 
+  filter(Elevation!=1561)%>% 
+  filter(Elevation!=2065)%>% 
+  filter(Elevation!=2134)%>% 
+  select(EHI_number) %>% 
+  pull()
+subset_meta_Tourmalet <- sample_metadata %>%
+  filter(Transect == "Tourmalet")%>% 
+   filter(Elevation!=1561)%>% 
+  filter(Elevation!=2065)%>% 
+  filter(Elevation!=2134)%>%
+  mutate(Zones = case_when(
+    Transect == "Tourmalet" & Elevation == 953 ~ "Z0",
+    Transect == "Tourmalet" & Elevation == 1255 ~ "Z1",
+    Transect == "Tourmalet" & Elevation == 1797 ~ "Z2",
+    Transect == "Tourmalet" & Elevation == 2306 ~ "Z3"))
 ```
 
+***Richness***
+```{r beta_div_pop_Tourmalet, warning=FALSE, comments="", message=FALSE}
+richness_Tourmalet<-as.matrix(beta_q0n$S)
+richness_Tourmalet <- as.dist(richness_Tourmalet[rownames(richness_Tourmalet) %in% samples_to_keep_Tourmalet,
+               colnames(richness_Tourmalet) %in% samples_to_keep_Tourmalet])
+betadisper(richness_Tourmalet, subset_meta_Tourmalet$Zones) %>% permutest(., pairwise = TRUE)
+```
 
-```{r tourmalet_mean_1, eval=TRUE, results=TRUE}
-# Merge all metrics
-beta_div_tourmalet <- bind_rows(richness_beta_tourmalet,neutral_beta_tourmalet,phylo_beta_tourmalet,func_beta_tourmalet) %>%
-  t() %>% 
-  as.data.frame() %>% 
-  rownames_to_column(var="Elevation") %>% 
-  as_tibble() %>% 
-  rename("richness"=V1,"neutral"=V2,"phylogenetic"=V3,"functional"=V4)
+```{r beta_richness_permanova_Tourmalet, warning=FALSE, comments="", message=FALSE}
+adonis2(richness_Tourmalet ~ Zones,
+        data = subset_meta_Tourmalet %>% arrange(match(EHI_number,labels(richness_Tourmalet))),
+        permutations = 999) %>%
+        broom::tidy() %>%
+        tt()
+```
+
+```{r beta_div_pop_Tourmalet_1, warning=FALSE, comments="", message=FALSE}
+pairwise <- pairwise.adonis(richness_Tourmalet, subset_meta_Tourmalet$Zones, perm=999)
+pairwise%>%
+  tt()
+```
+
+***Neutral***
+```{r beta_div_pop_neut_Tourmalet, warning=FALSE, comments="", message=FALSE}
+neutral_Tourmalet<-as.matrix(beta_q1n$S)
+neutral_Tourmalet <- as.dist(neutral_Tourmalet[rownames(neutral_Tourmalet) %in% samples_to_keep_Tourmalet,
+               colnames(neutral_Tourmalet) %in% samples_to_keep_Tourmalet])
+betadisper(neutral_Tourmalet, subset_meta_Tourmalet$Zones) %>% permutest(., pairwise = TRUE)
+```
+
+```{r beta_richness_permanova_neut_Tourmalet, warning=FALSE, comments="", message=FALSE}
+adonis2(neutral_Tourmalet ~ Zones,
+        data = subset_meta_Tourmalet %>% arrange(match(EHI_number,labels(neutral_Tourmalet))),
+        permutations = 999) %>%
+        broom::tidy() %>%
+        tt()
+```
+
+```{r beta_div_pop_Tourmalet_neut_1, warning=FALSE, comments="", message=FALSE}
+pairwise <- pairwise.adonis(neutral_Tourmalet, subset_meta_Tourmalet$Zones, perm=999)
+pairwise%>%
+  tt()
+```
+
+***Phylogenetic***
+```{r beta_div_pop_phylo_Tourmalet, warning=FALSE, comments="", message=FALSE}
+phylo_Tourmalet<-as.matrix(beta_q1p$S)
+phylo_Tourmalet <- as.dist(phylo_Tourmalet[rownames(phylo_Tourmalet) %in% samples_to_keep_Tourmalet,
+               colnames(phylo_Tourmalet) %in% samples_to_keep_Tourmalet])
+betadisper(phylo_Tourmalet, subset_meta_Tourmalet$Zones) %>% permutest(., pairwise = TRUE)
+```
+
+```{r beta_richness_permanova_phylo_Tourmalet, warning=FALSE, comments="", message=FALSE}
+adonis2(phylo_Tourmalet ~ Zones,
+        data = subset_meta_Tourmalet %>% arrange(match(EHI_number,labels(phylo_Tourmalet))),
+        permutations = 999) %>%
+        broom::tidy() %>%
+        tt()
+```
+
+```{r beta_div_pop_Tourmalet_phylo_1, warning=FALSE, comments="", message=FALSE}
+pairwise <- pairwise.adonis(phylo_Tourmalet, subset_meta_Tourmalet$Zones, perm=999)
+pairwise%>%
+  tt()
+```
+
+***Functional***
+```{r beta_div_pop_phylo_Tourmalet, warning=FALSE, comments="", message=FALSE}
+func_Tourmalet<-as.matrix(beta_q0n$S)
+func_Tourmalet <- as.dist(func_Tourmalet[rownames(func_Tourmalet) %in% samples_to_keep_Tourmalet,
+               colnames(func_Tourmalet) %in% samples_to_keep_Tourmalet])
+betadisper(func_Tourmalet, subset_meta_Tourmalet$Zones) %>% permutest(., pairwise = TRUE)
+```
+
+```{r beta_richness_permanova_Tourmalet, warning=FALSE, comments="", message=FALSE}
+adonis2(func_Tourmalet ~ Zones,
+        data = subset_meta_Tourmalet %>% arrange(match(EHI_number,labels(func_Tourmalet))),
+        permutations = 999) %>%
+        broom::tidy() %>%
+        tt()
+```
+
+```{r beta_div_pop_Tourmalet_1, warning=FALSE, comments="", message=FALSE}
+pairwise <- pairwise.adonis(func_Tourmalet, subset_meta_Tourmalet$Zones, perm=999)
+pairwise%>%
+  tt()
 ```
 

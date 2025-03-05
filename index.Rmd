@@ -1,5 +1,5 @@
 ---
-title: "AlberdiLab | Martin-Bideguren et al. 2024"
+title: "AlberdiLab | Martin-Bideguren et al. 2025"
 subtitle: "Study title to be added"
 author:
   - Garazi Martin-Bideguren^[University of Copenhagen, garazi.bideguren@sund.ku.dk], Ostaizka Aizpurua^[University of Copenhagen, ostaizka.aizpurua@sund.ku.dk], Javier Abalos^[University of Valencia,  jal4@uv.es], Fabien Aubret^[Centre National de la Recherche Scientifique, faubret@gmail.com], Guillem Pérez i de Lanuza^[University of Valencia, guillem.perez-lanuza@uv.es], Tom Sarraude^[Centre National de la Recherche Scientifique, t.sarraude@gmail.com], Nathalie Feiner^[University of Lund, nathalie.feiner@biol.lu.se], Tobias Uller^[University of Lund, tobias.uller@biol.lu.se], Aoife Leonard^[Aarhus University, aoife.leonard@sund.ku.dk] and Antton Alberdi^[University of Copenhagen, antton.alberdi@sund.ku.dk]
