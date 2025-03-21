@@ -71,6 +71,8 @@ library(ggtree)
 library(ggh4x)
 library(UpSetR)
 library(mapproj)
+library(ggpmisc)
+library(aplot)
 
 # For statistics
 library(spaa)
@@ -81,4 +83,8 @@ library(hilldiv2)
 library(distillR)
 library(Hmsc)
 library(corrplot)
+library(pairwiseAdonis)
+library(nlme)
+library(lme4)
+library(emmeans)
 ```
