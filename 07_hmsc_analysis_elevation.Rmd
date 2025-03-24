@@ -272,7 +272,7 @@ pred_elevation <- constructGradient(m,
 ```
 
 
-### Predicted richness at elevational level per transect (fix colors)
+### Predicted richness at elevational level
 
 ```{r hmsc_elevation_predictions_richness, warning=FALSE, comments="", message=FALSE}
 pred_elevation %>%

@@ -72,7 +72,7 @@ compute-variance-partitioning
 model-fit
 phylogenetic-signal
 elevation-predictions
-predicted-richness-at-elevational-level-per-transect-fix-colors
+predicted-richness-at-elevational-level
 responses-to-elevation
 functional-predictions
 element-level
