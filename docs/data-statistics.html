@@ -3382,7 +3382,10 @@ color: #a52929;
 <li class="chapter" data-level="7.1.1" data-path="diversity-analyses.html"><a href="diversity-analyses.html#regression-plots-per-transect"><i class="fa fa-check"></i><b>7.1.1</b> Regression plots per transect</a></li>
 <li class="chapter" data-level="7.1.2" data-path="diversity-analyses.html"><a href="diversity-analyses.html#mixed-models-per-metric"><i class="fa fa-check"></i><b>7.1.2</b> Mixed models per metric</a></li>
 </ul></li>
-<li class="chapter" data-level="7.2" data-path="diversity-analyses.html"><a href="diversity-analyses.html#beta-diversity-per-individual"><i class="fa fa-check"></i><b>7.2</b> Beta diversity per individual</a></li>
+<li class="chapter" data-level="7.2" data-path="diversity-analyses.html"><a href="diversity-analyses.html#beta-diversity-per-individual"><i class="fa fa-check"></i><b>7.2</b> Beta diversity per individual</a>
+<ul>
+<li class="chapter" data-level="7.2.1" data-path="diversity-analyses.html"><a href="diversity-analyses.html#spatial-distance-decay-in-neutral-beta-diversity"><i class="fa fa-check"></i><b>7.2.1</b> Spatial distance decay in neutral beta diversity</a></li>
+</ul></li>
 <li class="chapter" data-level="7.3" data-path="diversity-analyses.html"><a href="diversity-analyses.html#beta-diversity-per-population"><i class="fa fa-check"></i><b>7.3</b> Beta diversity per population</a>
 <ul>
 <li class="chapter" data-level="7.3.1" data-path="diversity-analyses.html"><a href="diversity-analyses.html#transit-zones"><i class="fa fa-check"></i><b>7.3.1</b> Transit zones</a></li>
@@ -3407,7 +3410,8 @@ color: #a52929;
 <li class="chapter" data-level="9.4" data-path="elevation-hmsc-analysis.html"><a href="elevation-hmsc-analysis.html#phylogenetic-signal"><i class="fa fa-check"></i><b>9.4</b> Phylogenetic signal</a></li>
 <li class="chapter" data-level="9.5" data-path="elevation-hmsc-analysis.html"><a href="elevation-hmsc-analysis.html#elevation-predictions"><i class="fa fa-check"></i><b>9.5</b> Elevation predictions</a>
 <ul>
-<li class="chapter" data-level="9.5.1" data-path="elevation-hmsc-analysis.html"><a href="elevation-hmsc-analysis.html#responses-to-elevation"><i class="fa fa-check"></i><b>9.5.1</b> Responses to elevation</a></li>
+<li class="chapter" data-level="9.5.1" data-path="elevation-hmsc-analysis.html"><a href="elevation-hmsc-analysis.html#predicted-richness-at-elevational-level-per-transect-fix-colors"><i class="fa fa-check"></i><b>9.5.1</b> Predicted richness at elevational level per transect (fix colors)</a></li>
+<li class="chapter" data-level="9.5.2" data-path="elevation-hmsc-analysis.html"><a href="elevation-hmsc-analysis.html#responses-to-elevation"><i class="fa fa-check"></i><b>9.5.2</b> Responses to elevation</a></li>
 </ul></li>
 <li class="chapter" data-level="9.6" data-path="elevation-hmsc-analysis.html"><a href="elevation-hmsc-analysis.html#functional-predictions"><i class="fa fa-check"></i><b>9.6</b> Functional predictions</a>
 <ul>
@@ -3452,8 +3456,8 @@ color: #a52929;
 
     <script>
 
-      function styleCell_npql59382ii7b3bcskhy(i, j, css_id) {
-          var table = document.getElementById("tinytable_npql59382ii7b3bcskhy");
+      function styleCell_by2avjvmtxbljyiuw0qf(i, j, css_id) {
+          var table = document.getElementById("tinytable_by2avjvmtxbljyiuw0qf");
           var cell = table.rows[i]?.cells[j];  // Safe navigation to avoid errors
           if (cell) {
               console.log(`Styling cell at (${i}, ${j}) with class ${css_id}`);
@@ -3463,7 +3467,7 @@ color: #a52929;
           }
       }
       function insertSpanRow(i, colspan, content) {
-        var table = document.getElementById('tinytable_npql59382ii7b3bcskhy');
+        var table = document.getElementById('tinytable_by2avjvmtxbljyiuw0qf');
         var newRow = table.insertRow(i);
         var newCell = newRow.insertCell(0);
         newCell.setAttribute("colspan", colspan);
@@ -3471,8 +3475,8 @@ color: #a52929;
         // this may be unsafe, but innerText does not interpret <br>
         newCell.innerHTML = content;
       }
-      function spanCell_npql59382ii7b3bcskhy(i, j, rowspan, colspan) {
-        var table = document.getElementById("tinytable_npql59382ii7b3bcskhy");
+      function spanCell_by2avjvmtxbljyiuw0qf(i, j, rowspan, colspan) {
+        var table = document.getElementById("tinytable_by2avjvmtxbljyiuw0qf");
         const targetRow = table.rows[i];
         const targetCell = targetRow.cells[j];
         for (let r = 0; r < rowspan; r++) {
@@ -3502,14 +3506,14 @@ color: #a52929;
       window.addEventListener('load', function () {
           var cellsToStyle = [
             // tinytable style arrays after
-          { positions: [ { i: 1, j: 0 }, { i: 1, j: 1 },  ], css_id: 'tinytable_css_l30evtwl1zkw7lbck7bo',}, 
-          { positions: [ { i: 0, j: 0 }, { i: 0, j: 1 },  ], css_id: 'tinytable_css_4c91w8g75gwhk6n4kpaq',}, 
+          { positions: [ { i: 1, j: 0 }, { i: 1, j: 1 },  ], css_id: 'tinytable_css_b1r9dvx9aty2chtjf3jr',}, 
+          { positions: [ { i: 0, j: 0 }, { i: 0, j: 1 },  ], css_id: 'tinytable_css_22yha0jav3v50k053cio',}, 
           ];
 
           // Loop over the arrays to style the cells
           cellsToStyle.forEach(function (group) {
               group.positions.forEach(function (cell) {
-                  styleCell_npql59382ii7b3bcskhy(cell.i, cell.j, group.css_id);
+                  styleCell_by2avjvmtxbljyiuw0qf(cell.i, cell.j, group.css_id);
               });
           });
       });
@@ -3517,11 +3521,11 @@ color: #a52929;
 
     <style>
 
-.table td.tinytable_css_l30evtwl1zkw7lbck7bo, .table th.tinytable_css_l30evtwl1zkw7lbck7bo { border-bottom: solid #d3d8dc 0.1em; }
-.table td.tinytable_css_4c91w8g75gwhk6n4kpaq, .table th.tinytable_css_4c91w8g75gwhk6n4kpaq { border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
+.table td.tinytable_css_b1r9dvx9aty2chtjf3jr, .table th.tinytable_css_b1r9dvx9aty2chtjf3jr { border-bottom: solid #d3d8dc 0.1em; }
+.table td.tinytable_css_22yha0jav3v50k053cio, .table th.tinytable_css_22yha0jav3v50k053cio { border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
 </style>
     <div class="container">
-      <table class="table table-borderless" id="tinytable_npql59382ii7b3bcskhy" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+      <table class="table table-borderless" id="tinytable_by2avjvmtxbljyiuw0qf" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
         <thead>
         
               <tr>
@@ -3568,8 +3572,8 @@ color: #a52929;
 
     <script>
 
-      function styleCell_sgmj6ncduqo8kmk0pd2u(i, j, css_id) {
-          var table = document.getElementById("tinytable_sgmj6ncduqo8kmk0pd2u");
+      function styleCell_kum4rpw5hi2ihiifn0o0(i, j, css_id) {
+          var table = document.getElementById("tinytable_kum4rpw5hi2ihiifn0o0");
           var cell = table.rows[i]?.cells[j];  // Safe navigation to avoid errors
           if (cell) {
               console.log(`Styling cell at (${i}, ${j}) with class ${css_id}`);
@@ -3579,7 +3583,7 @@ color: #a52929;
           }
       }
       function insertSpanRow(i, colspan, content) {
-        var table = document.getElementById('tinytable_sgmj6ncduqo8kmk0pd2u');
+        var table = document.getElementById('tinytable_kum4rpw5hi2ihiifn0o0');
         var newRow = table.insertRow(i);
         var newCell = newRow.insertCell(0);
         newCell.setAttribute("colspan", colspan);
@@ -3587,8 +3591,8 @@ color: #a52929;
         // this may be unsafe, but innerText does not interpret <br>
         newCell.innerHTML = content;
       }
-      function spanCell_sgmj6ncduqo8kmk0pd2u(i, j, rowspan, colspan) {
-        var table = document.getElementById("tinytable_sgmj6ncduqo8kmk0pd2u");
+      function spanCell_kum4rpw5hi2ihiifn0o0(i, j, rowspan, colspan) {
+        var table = document.getElementById("tinytable_kum4rpw5hi2ihiifn0o0");
         const targetRow = table.rows[i];
         const targetCell = targetRow.cells[j];
         for (let r = 0; r < rowspan; r++) {
@@ -3618,14 +3622,14 @@ color: #a52929;
       window.addEventListener('load', function () {
           var cellsToStyle = [
             // tinytable style arrays after
-          { positions: [ { i: 105, j: 0 }, { i: 105, j: 1 }, { i: 105, j: 2 }, { i: 105, j: 3 }, { i: 105, j: 4 },  ], css_id: 'tinytable_css_qi67kn3nj2mlkfxi4abf',}, 
-          { positions: [ { i: 0, j: 0 }, { i: 0, j: 1 }, { i: 0, j: 2 }, { i: 0, j: 3 }, { i: 0, j: 4 },  ], css_id: 'tinytable_css_49q2ujaz677smalw429m',}, 
+          { positions: [ { i: 105, j: 0 }, { i: 105, j: 1 }, { i: 105, j: 2 }, { i: 105, j: 3 }, { i: 105, j: 4 },  ], css_id: 'tinytable_css_re030m4ehvvu1fbmfiwz',}, 
+          { positions: [ { i: 0, j: 0 }, { i: 0, j: 1 }, { i: 0, j: 2 }, { i: 0, j: 3 }, { i: 0, j: 4 },  ], css_id: 'tinytable_css_h848vxsrr9fgfrppouvb',}, 
           ];
 
           // Loop over the arrays to style the cells
           cellsToStyle.forEach(function (group) {
               group.positions.forEach(function (cell) {
-                  styleCell_sgmj6ncduqo8kmk0pd2u(cell.i, cell.j, group.css_id);
+                  styleCell_kum4rpw5hi2ihiifn0o0(cell.i, cell.j, group.css_id);
               });
           });
       });
@@ -3633,11 +3637,11 @@ color: #a52929;
 
     <style>
 
-.table td.tinytable_css_qi67kn3nj2mlkfxi4abf, .table th.tinytable_css_qi67kn3nj2mlkfxi4abf { border-bottom: solid #d3d8dc 0.1em; }
-.table td.tinytable_css_49q2ujaz677smalw429m, .table th.tinytable_css_49q2ujaz677smalw429m { border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
+.table td.tinytable_css_re030m4ehvvu1fbmfiwz, .table th.tinytable_css_re030m4ehvvu1fbmfiwz { border-bottom: solid #d3d8dc 0.1em; }
+.table td.tinytable_css_h848vxsrr9fgfrppouvb, .table th.tinytable_css_h848vxsrr9fgfrppouvb { border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
 </style>
     <div class="container">
-      <table class="table table-borderless" id="tinytable_sgmj6ncduqo8kmk0pd2u" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+      <table class="table table-borderless" id="tinytable_kum4rpw5hi2ihiifn0o0" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
         <thead>
         
               <tr>

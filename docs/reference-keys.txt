@@ -50,6 +50,7 @@ beta-diversity-per-individual
 richness
 neutral
 phylogenetic
+spatial-distance-decay-in-neutral-beta-diversity
 beta-diversity-per-population
 transit-zones
 aisa
@@ -71,6 +72,7 @@ compute-variance-partitioning
 model-fit
 phylogenetic-signal
 elevation-predictions
+predicted-richness-at-elevational-level-per-transect-fix-colors
 responses-to-elevation
 functional-predictions
 element-level

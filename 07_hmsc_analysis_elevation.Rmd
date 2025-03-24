@@ -271,6 +271,25 @@ pred_elevation <- constructGradient(m,
                       pivot_longer(-c(elevation), names_to = "genome", values_to = "value")
 ```
 
+
+### Predicted richness at elevational level per transect (fix colors)
+
+```{r hmsc_elevation_predictions_richness, warning=FALSE, comments="", message=FALSE}
+pred_elevation %>%
+  left_join(genome_metadata, by = join_by(genome == genome)) %>%
+  select("elevation", "genome", "value", "phylum")%>%
+  ggplot(., aes(x = elevation, y = value, fill = phylum, colour=phylum)) +
+  stat_summary(fun = mean, geom = "line", size = 1) +
+  stat_summary(fun.data = mean_cl_boot, geom = "ribbon", alpha = 0.2) +
+  scale_colour_manual(values=phylum_colors) +
+  scale_fill_manual(values=phylum_colors) +
+  theme_classic() +
+  xlab("Elevation (m)") +
+  ylab("Predicted Richness")
+```
+
+
+
 ### Responses to elevation
 
 ```{r hmsc_dominanve_predictions_genomes_plot, warning=FALSE, comments="", message=FALSE, fig.height=8, fig.width=10, fig.fullwidth=TRUE}

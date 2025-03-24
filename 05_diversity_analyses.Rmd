@@ -133,13 +133,13 @@ alpha_div %>%
   filter(metric!="functional")%>%
       ggplot(aes(y = value, x = Elevation, group=Transect, colour=Transect)) +
       geom_point(alpha=0.4) +
-        geom_smooth(method = "loess", se=FALSE) +
+      geom_smooth(method = "loess", se=FALSE) +
       scale_colour_manual(name="Transect",
           breaks=c("Aisa","Aran","Sentein","Tourmalet"),
           labels=c("Aisa","Aran","Sentein","Tourmalet"),
           values=c("#e5bd5b", "#6b7398","#e2815a", "#876b96")) +
       facet_wrap(. ~ metric, scales = "free", ncol=4) +
-      coord_cartesian(xlim = c(1, NA)) +
+      xlim(800, 2400)+
       theme_classic() +
       theme(
         strip.background = element_blank(),
@@ -253,6 +253,61 @@ adonis2(beta_q1p$S ~ Elevation+I(Elevation^2)+Transect,
         broom::tidy() %>%
         tt()
 ```
+
+
+### Spatial distance decay in neutral beta diversity
+
+```{r beta_div_dk_data, echo=TRUE, results = TRUE}
+#Create community composition matrix with elevation difference data and transect assignation
+
+# Convert dissimilarity matrix to long format
+dissimilarity_long <- reshape2::melt(as.matrix(beta_q1n$S))
+
+# Rename columns for clarity
+colnames(dissimilarity_long) <- c("Sample1", "Sample2", "Dissimilarity")
+
+## Create vector of elevations per transect
+elevation_vectors <- sample_metadata %>%
+  split(.$Transect) %>%
+  lapply(function(df) setNames(df$Elevation, df$EHI_number))
+
+# Compute pairwise absolute elevation differences èr transect
+elevation_dist_matrices <- lapply(elevation_vectors, function(ev) as.dist(dist(ev, method = "manhattan")))
+
+elevation_dist_long <- lapply(names(elevation_dist_matrices), function(transect) {
+  df <- reshape::melt(as.matrix(elevation_dist_matrices[[transect]]))
+  colnames(df) <- c("Sample1", "Sample2", "ElevationDifference")
+  df$Transect <- transect  # Add transect info
+  return(df)
+})
+
+#Combine the four transects into a single df
+elevation_dist_long <- do.call(rbind, elevation_dist_long)
+
+
+# Merge and keep only samples that appear in both matrices
+distance_decay_data <- merge(dissimilarity_long, elevation_dist_long, by = c("Sample1", "Sample2"))
+
+##Remove self comparisons
+distance_decay_data<-distance_decay_data %>%
+  filter(Dissimilarity!=0)
+```
+
+
+```{r beta_div_dk_plot, echo=TRUE, results = TRUE}
+ggplot(distance_decay_data, aes(x = ElevationDifference, y = Dissimilarity, color = Transect)) +
+  geom_point(alpha = 0.2) +  # Scatterplot with transparency
+  geom_smooth(method = "lm", se = TRUE) +  # Regression lines per transect
+  scale_colour_manual(name="Transect",
+          breaks=c("Aisa","Aran","Sentein","Tourmalet"),
+          labels=c("Aisa","Aran","Sentein","Tourmalet"),
+          values=c("#e5bd5b", "#6b7398","#e2815a", "#876b96")) +
+  theme_classic() +
+  xlab("Elevation Difference (m)") +
+  ylab("Dissimilarity") +
+  theme(legend.title = element_blank())
+```
+
 
 ## Beta diversity per population
 
@@ -378,8 +433,9 @@ beta_div_met$Tras<-as.factor(beta_div_met$Zones)
 ```
 
 ```{r beta_div_boxplot_2, comment="", results=FALSE, message=FALSE, warning=FALSE, fig.height=15, fig.width=14}
+beta_div_met$metric <- factor(beta_div_met$metric, levels = c("richness", "neutral", "phylogenetic"))
 bxp1<-beta_div_met%>%
-      ggplot(aes(y = value, x = Zones, group=Zones, colour=Transect, fill=Transect)) +
+      ggplot(aes(y = value, x = Sampling_point, group=Sampling_point, colour=Transect, fill=Transect)) +
       geom_boxplot() +
       geom_jitter() +
       #scale_colour_gradient(low="#a7f0ba", high="#044319") +
@@ -453,7 +509,7 @@ beta_div_pop %>%
           labels=c("Aisa","Aran","Sentein","Tourmalet"),
           values=c("#e5bd5b50", "#6b739850","#e2815a50", "#876b9650")) +
       facet_wrap(. ~ metric, scales = "free", ncol=4) +
-      coord_cartesian(xlim = c(1, NA)) +
+      coord_cartesian(xlim = c(800, 2400)) +
       #stat_compare_means(size=2) +
       theme_classic() +
       theme(
