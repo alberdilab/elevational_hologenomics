@@ -47,9 +47,7 @@ richness-diversity
 neutral-diversity
 phylogenetic-diversity
 beta-diversity-per-individual
-richness
-neutral
-phylogenetic
+nmds-across-transects-and-elevational-gradient
 spatial-distance-decay-in-neutral-beta-diversity
 beta-diversity-per-population
 transit-zones

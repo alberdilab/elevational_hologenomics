@@ -281,11 +281,18 @@ pred_elevation %>%
   ggplot(., aes(x = elevation, y = value, fill = phylum, colour=phylum)) +
   stat_summary(fun = mean, geom = "line", size = 1) +
   stat_summary(fun.data = mean_cl_boot, geom = "ribbon", alpha = 0.2) +
-  scale_colour_manual(values=phylum_colors) +
-  scale_fill_manual(values=phylum_colors) +
+  scale_color_manual(name="phylum",
+                       breaks=c("p__Bacillota_A", "p__Bacillota", "p__Bacillota_C", "p__Bacteroidota", "p__Campylobacterota", "p__Desulfobacterota", "p__Fusobacteriota", "p__Pseudomonadota", "p__Verrucomicrobiota"),
+                       labels=c("Bacillota_A", "Bacillota", "Bacillota_C", "Bacteroidota", "Campylobacterota", "Desulfobacterota", "Fusobacteriota", "Pseudomonadota", "Verrucomicrobiota"),
+                       values=c("#086c98ff","#08d1d1ff","#04384f","#670034","#ff0000","#008000","#ebac82","#ebe082","#b09595ff")) +
+      scale_fill_manual(name="phylum",
+                       breaks=c("p__Bacillota_A", "p__Bacillota", "p__Bacillota_C", "p__Bacteroidota", "p__Campylobacterota", "p__Desulfobacterota", "p__Fusobacteriota", "p__Pseudomonadota", "p__Verrucomicrobiota"),
+                       labels=c("Bacillota_A", "Bacillota", "Bacillota_C", "Bacteroidota", "Campylobacterota", "Desulfobacterota", "Fusobacteriota", "Pseudomonadota", "Verrucomicrobiota"),
+                       values=c("#086c98ff","#08d1d1ff","#04384f","#670034","#ff0000","#008000","#ebac82","#ebe082","#b09595ff")) +
   theme_classic() +
   xlab("Elevation (m)") +
   ylab("Predicted Richness")
+
 ```
 
 
@@ -327,6 +334,7 @@ post_estimates %>%
                axis.text.x = element_text(angle = 45, hjust = 0.8,),
                axis.line.x = element_line(size = 0.5, linetype = "solid", colour = "black"),
 )
+
 ```
 
 ## Functional predictions

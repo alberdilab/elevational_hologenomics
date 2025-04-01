@@ -95,7 +95,7 @@ alpha_div %>%
 ```
 
 ```{r alpha_div_plot, comment="", message=FALSE, warning=FALSE, fig.height=4, fig.width=10, fig.fullwidth=TRUE}
-alpha_div %>%
+p0<-alpha_div %>%
   pivot_longer(-sample, names_to = "metric", values_to = "value") %>%
   left_join(., sample_metadata, by = join_by(sample == EHI_number)) %>%
   mutate(metric=factor(metric,levels=c("richness","neutral","phylogenetic"))) %>%
@@ -112,12 +112,12 @@ alpha_div %>%
           values=c("#e5bd5b50", "#6b739850","#e2815a50", "#876b9650")) +
       facet_wrap(. ~ metric, scales = "free", ncol=4) +
       coord_cartesian(xlim = c(1, NA)) +
-      stat_compare_means(size=2) +
+      stat_compare_means(size=3) +
       theme_classic() +
       theme(
         strip.background = element_blank(),
         panel.grid.minor.x = element_line(size = .1, color = "grey"),
-        axis.text.x = element_text(angle = 45, hjust = 1)
+        axis.text.x = element_text(angle = 45, hjust = 1, size=0)
       ) +
   ylab("Alpha diversity")      
       
@@ -126,11 +126,10 @@ alpha_div %>%
 ### Regression plots per transect
 
 ```{r alpha_div_richness_plot, message=FALSE, warning=FALSE, fig.height=4, fig.width=10, fig.fullwidth=TRUE}
-alpha_div %>%
+p1<-alpha_div %>%
   pivot_longer(-sample, names_to = "metric", values_to = "value") %>%
   left_join(., sample_metadata, by = join_by(sample == EHI_number)) %>%
   mutate(metric=factor(metric,levels=c("richness","neutral","phylogenetic"))) %>%
-  filter(metric!="functional")%>%
       ggplot(aes(y = value, x = Elevation, group=Transect, colour=Transect)) +
       geom_point(alpha=0.4) +
       geom_smooth(method = "loess", se=FALSE) +
@@ -146,7 +145,9 @@ alpha_div %>%
         panel.grid.minor.x = element_line(size = .1, color = "grey"),
         axis.text.x = element_text(angle = 45, hjust = 1)
       ) + 
-  ylab("Alpha diversity")
+  ylab("Alpha diversity") +
+  xlab("Elevation (m)")
+
 ```
 
 
@@ -206,7 +207,7 @@ save(beta_q0n,
      file = "data/beta_div_21032025.Rdata")
 ```
 
-#### Richness
+***Richness across transects and elevational gradients*** 
 
 ```{r beta_div_richness_permutest, echo=TRUE, results = TRUE}
 betadisper(beta_q0n$S, sample_metadata$Transect) %>% permutest(., pairwise=TRUE) 
@@ -222,14 +223,30 @@ adonis2(beta_q0n$S ~ Elevation+I(Elevation^2)+Transect,
         tt()
 ```
 
-#### Neutral
+
+***Richness across transects and sampling points*** 
+
+```{r beta_div_richness_permutest_1, echo=TRUE, results = TRUE}
+betadisper(beta_q0n$S, sample_metadata$Sampling_point) %>% permutest(., pairwise=TRUE) 
+```
+
+```{r beta_div_richness_adonis_1, echo=TRUE, results = TRUE}
+adonis2(beta_q0n$S ~ Transect + Sampling_point, 
+        data = sample_metadata %>% arrange(match(EHI_number,labels(beta_q0n$S))), 
+        permutations = 999,
+        by="terms") %>%
+        broom::tidy() %>%
+        tt()
+```
+
+***Neutral across transects and elevational gradients*** 
 
 ```{r beta_div_neutral_permutest, echo=TRUE, results = TRUE}
 betadisper(beta_q1n$S, sample_metadata$Transect) %>% permutest(., pairwise=TRUE) 
 ```
 
 ```{r beta_div_neutral_adonis, echo=TRUE, results = TRUE}
-adonis2(beta_q1n$S ~ Elevation+I(Elevation^2)+Transect+Sampling_point, 
+adonis2(beta_q1n$S ~ Transect+Elevation+I(Elevation^2), 
         data = sample_metadata %>% arrange(match(EHI_number,labels(beta_q1n$S))), 
         permutations = 999,
         strata = sample_metadata %>% arrange(match(EHI_number,labels(beta_q1n$S))) %>% pull(Sampling_point),
@@ -238,7 +255,22 @@ adonis2(beta_q1n$S ~ Elevation+I(Elevation^2)+Transect+Sampling_point,
         tt()
 ```
 
-#### Phylogenetic
+***Neutral across transects and sampling points*** 
+
+```{r beta_div_neutral_permutest_1, echo=TRUE, results = TRUE}
+betadisper(beta_q1n$S, sample_metadata$Sampling_point) %>% permutest(., pairwise=TRUE) 
+```
+
+```{r beta_div_neutral_adonis_1, echo=TRUE, results = TRUE}
+adonis2(beta_q1n$S ~ Transect + Sampling_point, 
+        data = sample_metadata %>% arrange(match(EHI_number,labels(beta_q1n$S))), 
+        permutations = 999,
+        by="terms") %>%
+        broom::tidy() %>%
+        tt()
+```
+
+***Phylogenetic cross transects and elevational gradients***
 
 ```{r beta_div_phylo_permutest, echo=TRUE, results = TRUE}
 betadisper(beta_q1p$S, sample_metadata$Transect) %>% permutest(., pairwise=TRUE) 
@@ -252,6 +284,77 @@ adonis2(beta_q1p$S ~ Elevation+I(Elevation^2)+Transect,
         by="terms") %>%
         broom::tidy() %>%
         tt()
+```
+
+***Phylogenetic across transects and sampling points*** 
+
+```{r beta_div_phylo_permutest_1, echo=TRUE, results = TRUE}
+betadisper(beta_q1p$S, sample_metadata$Sampling_point) %>% permutest(., pairwise=TRUE) 
+```
+
+```{r beta_div_phylo_adonis_1, echo=TRUE, results = TRUE}
+adonis2(beta_q1p$S ~ Transect + Sampling_point, 
+        data = sample_metadata %>% arrange(match(EHI_number,labels(beta_q1p$S))), 
+        permutations = 999,
+        by="terms") %>%
+        broom::tidy() %>%
+        tt()
+```
+
+
+### NMDS across transects and elevational gradient
+```{r beta_div_nmds, echo=TRUE, results = TRUE}
+p0<-beta_q0n$S %>%
+        metaMDS(.,trymax = 500, k=2, verbosity=FALSE, trace=FALSE) %>%
+        vegan::scores() %>%
+        as_tibble(., rownames = "sample") %>%
+        left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+        group_by(Transect, Elevation) %>%
+        mutate(x_cen = mean(NMDS1, na.rm = TRUE)) %>%
+        mutate(y_cen = mean(NMDS2, na.rm = TRUE)) %>%
+        ungroup() %>%
+        ggplot(., aes(x=NMDS1,y=NMDS2, color=factor(Elevation), shape=Transect)) +
+                geom_point(size=2) +
+                geom_segment(aes(x=x_cen, y=y_cen, xend=NMDS1, yend=NMDS2), alpha=0.2) +
+        labs(y = "NMDS2", x="NMDS1 \n Richness beta diversity") +
+                theme_classic() +
+              guides(col = guide_legend(ncol = 2))
+
+p1<-beta_q1n$S %>%
+        metaMDS(.,trymax = 500, k=2, verbosity=FALSE, trace=FALSE) %>%
+        vegan::scores() %>%
+        as_tibble(., rownames = "sample") %>%
+        left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+        group_by(Transect, Elevation) %>%
+        mutate(x_cen = mean(NMDS1, na.rm = TRUE)) %>%
+        mutate(y_cen = mean(NMDS2, na.rm = TRUE)) %>%
+        ungroup() %>%
+        ggplot(., aes(x=NMDS1,y=NMDS2, color=factor(Elevation), shape=Transect)) +
+                geom_point(size=2) +
+                geom_segment(aes(x=x_cen, y=y_cen, xend=NMDS1, yend=NMDS2), alpha=0.2) +
+        labs(y = "NMDS2", x="NMDS1 \n Neutral beta diversity") +
+                theme_classic() +
+              guides(col = guide_legend(ncol = 2))
+
+p2<-beta_q1p$S %>%
+        metaMDS(.,trymax = 500, k=2, verbosity=FALSE, trace=FALSE) %>%
+        vegan::scores() %>%
+        as_tibble(., rownames = "sample") %>%
+        left_join(sample_metadata, by = join_by(sample == EHI_number)) %>%
+        group_by(Transect, Elevation) %>%
+        mutate(x_cen = mean(NMDS1, na.rm = TRUE)) %>%
+        mutate(y_cen = mean(NMDS2, na.rm = TRUE)) %>%
+        ungroup() %>%
+        ggplot(., aes(x=NMDS1,y=NMDS2, color=factor(Elevation), shape=Transect)) +
+                geom_point(size=2) +
+                geom_segment(aes(x=x_cen, y=y_cen, xend=NMDS1, yend=NMDS2), alpha=0.2) +
+        labs(y = "NMDS2", x="NMDS1 \n Phylogenetic beta diversity") +
+                theme_classic() +
+              guides(col = guide_legend(ncol = 2))
+```
+
+```{r beta_div_nmds_plot, echo=TRUE, results = TRUE, fig.height=6, fig.width=15, fig.fullwidth=TRUE}
+ggarrange(p0, p1, p2, ncol=3, nrow=1, common.legend = TRUE, legend="right")
 ```
 
 
@@ -271,7 +374,7 @@ elevation_vectors <- sample_metadata %>%
   split(.$Transect) %>%
   lapply(function(df) setNames(df$Elevation, df$EHI_number))
 
-# Compute pairwise absolute elevation differences èr transect
+# Compute pairwise absolute elevation differences per transect
 elevation_dist_matrices <- lapply(elevation_vectors, function(ev) as.dist(dist(ev, method = "manhattan")))
 
 elevation_dist_long <- lapply(names(elevation_dist_matrices), function(transect) {
@@ -294,17 +397,17 @@ distance_decay_data<-distance_decay_data %>%
 ```
 
 
-```{r beta_div_dk_plot, echo=TRUE, results = TRUE}
+```{r beta_div_dk_plot, echo=TRUE, results = TRUE, warning=FALSE, comment=FALSE, message=FALSE}
 ggplot(distance_decay_data, aes(x = ElevationDifference, y = Dissimilarity, color = Transect)) +
-  geom_point(alpha = 0.2) +  # Scatterplot with transparency
-  geom_smooth(method = "lm", se = TRUE) +  # Regression lines per transect
+  geom_point(alpha = 0.2) +  
+  geom_smooth(method = "lm", se = TRUE) +
   scale_colour_manual(name="Transect",
           breaks=c("Aisa","Aran","Sentein","Tourmalet"),
           labels=c("Aisa","Aran","Sentein","Tourmalet"),
           values=c("#e5bd5b", "#6b7398","#e2815a", "#876b96")) +
   theme_classic() +
-  xlab("Elevation Difference (m)") +
-  ylab("Dissimilarity") +
+  xlab("Elevation difference (m)") +
+  ylab("Neutral beta diversity dissimilarity") +
   theme(legend.title = element_blank())
 ```
 
@@ -517,7 +620,8 @@ beta_div_pop %>%
         panel.grid.minor.x = element_line(size = .1, color = "grey"),
         axis.text.x = element_text(angle = 45, hjust = 1)
       ) + 
-  ylab("Beta diversity")
+  ylab("Beta diversity") + 
+  xlab("Elevation (m)")
 
 ```
 
