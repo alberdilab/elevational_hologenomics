@@ -272,7 +272,7 @@ pred_elevation <- constructGradient(m,
 ```
 
 
-### Predicted richness at elevational level
+### Predicted adundance at elevational level
 
 ```{r hmsc_elevation_predictions_richness, warning=FALSE, comments="", message=FALSE}
 pred_elevation %>%
@@ -291,7 +291,7 @@ pred_elevation %>%
                        values=c("#086c98ff","#08d1d1ff","#04384f","#670034","#ff0000","#008000","#ebac82","#ebe082","#b09595ff")) +
   theme_classic() +
   xlab("Elevation (m)") +
-  ylab("Predicted Richness")
+  ylab("Predicted Abundance")
 
 ```
 
@@ -621,7 +621,7 @@ all_functions %>%
   ggplot(aes(x=mean, y=fct_reorder(function_legend, mean), xmin=p1, xmax=p9, color=function_legend)) +
       geom_point() +
       geom_errorbar() +
-      xlim(c(-0.05,0.06)) +
+      xlim(c(-0.06,0.06)) +
       geom_vline(xintercept=0) +
       scale_color_manual(values = gift_colors$Color) +
       theme_minimal() +

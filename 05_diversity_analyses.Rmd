@@ -95,7 +95,7 @@ alpha_div %>%
 ```
 
 ```{r alpha_div_plot, comment="", message=FALSE, warning=FALSE, fig.height=4, fig.width=10, fig.fullwidth=TRUE}
-p0<-alpha_div %>%
+alpha_div %>%
   pivot_longer(-sample, names_to = "metric", values_to = "value") %>%
   left_join(., sample_metadata, by = join_by(sample == EHI_number)) %>%
   mutate(metric=factor(metric,levels=c("richness","neutral","phylogenetic"))) %>%
@@ -126,7 +126,7 @@ p0<-alpha_div %>%
 ### Regression plots per transect
 
 ```{r alpha_div_richness_plot, message=FALSE, warning=FALSE, fig.height=4, fig.width=10, fig.fullwidth=TRUE}
-p1<-alpha_div %>%
+alpha_div %>%
   pivot_longer(-sample, names_to = "metric", values_to = "value") %>%
   left_join(., sample_metadata, by = join_by(sample == EHI_number)) %>%
   mutate(metric=factor(metric,levels=c("richness","neutral","phylogenetic"))) %>%
@@ -214,7 +214,7 @@ betadisper(beta_q0n$S, sample_metadata$Transect) %>% permutest(., pairwise=TRUE)
 ```
 
 ```{r beta_div_richness_adonis, echo=TRUE, results = TRUE}
-adonis2(beta_q0n$S ~ Elevation+I(Elevation^2)+Transect, 
+adonis2(beta_q0n$S ~ Transect+Elevation+I(Elevation^2), 
         data = sample_metadata %>% arrange(match(EHI_number,labels(beta_q0n$S))), 
         permutations = 999,
         strata = sample_metadata %>% arrange(match(EHI_number,labels(beta_q0n$S))) %>% pull(Sampling_point),
@@ -277,7 +277,7 @@ betadisper(beta_q1p$S, sample_metadata$Transect) %>% permutest(., pairwise=TRUE)
 ```
 
 ```{r beta_div_phylo_adonis, echo=TRUE, results = TRUE}
-adonis2(beta_q1p$S ~ Elevation+I(Elevation^2)+Transect, 
+adonis2(beta_q1p$S ~ Transect+Elevation+I(Elevation^2), 
         data = sample_metadata %>% arrange(match(EHI_number,labels(beta_q1p$S))), 
         permutations = 999,
         strata = sample_metadata %>% arrange(match(EHI_number,labels(beta_q1p$S))) %>% pull(Sampling_point),
@@ -409,8 +409,13 @@ ggplot(distance_decay_data, aes(x = ElevationDifference, y = Dissimilarity, colo
   xlab("Elevation difference (m)") +
   ylab("Neutral beta diversity dissimilarity") +
   theme(legend.title = element_blank())
+
 ```
 
+```{r beta_div_dk_plot_lm, echo=TRUE, results = TRUE, warning=FALSE, comment=FALSE, message=FALSE}
+model <- lm(Dissimilarity ~ ElevationDifference, data = distance_decay_data)
+summary(model)
+```
 
 ## Beta diversity per population
 
