@@ -1,0 +1,105 @@
+# Diet
+
+## Load data
+
+```{r load_data_4, comment="", echo=FALSE, message=FALSE, warning=FALSE}
+load("data/data.Rdata")
+diet <- read_csv("data/elevation_diet.csv")
+```
+```{r filter_diet, comment="", echo=FALSE, message=FALSE, warning=FALSE}
+target_taxon <- "k__Animalia;p__Chordata;c__Reptilia;o__Squamata;f__Lacertidae;g__Podarcis"
+target_row <- diet %>% filter(Taxonomy == target_taxon)
+
+parts <- str_split(target_taxon, ";")[[1]]
+parents <- map_chr(1:(length(parts) - 1), ~ paste(parts[1:.x], collapse = ";"))
+samples <- colnames(diet)[-1]
+
+diet2 <- diet %>%
+  mutate(across(all_of(samples), ~ if_else(Taxonomy %in% parents, . - target_row[[cur_column()]], .))) %>%
+  filter(Taxonomy != target_taxon)
+
+colnames(diet2) <- sub("_.*", "", colnames(diet2))
+```
+
+```{r diet_class_diversity, comment="", echo=FALSE, message=FALSE, warning=FALSE}
+#Class tree
+class_tree <- diet2 %>% 
+  filter(str_detect(Taxonomy, "^k__[^;]*;p__[^;]*;c__[^;]*$")) %>% 
+  select(Taxonomy) %>% 
+  separate(Taxonomy, c("domain","phylum","class"),  sep =";") %>%
+  mutate(across(c(domain, phylum, class), as.factor)) %>% 
+  as.phylo(~domain/phylum/class, data = ., collapse=FALSE) %>% 
+  compute.brlen(., method = "path")
+
+class_diversity <- diet2 %>% 
+  filter(str_detect(Taxonomy, "^k__[^;]*;p__[^;]*;c__[^;]*$")) %>% 
+  mutate(Taxonomy = str_extract(Taxonomy, "c__[^;]+$")) %>% 
+  column_to_rownames(var="Taxonomy") %>% 
+  tss() %>% 
+  as.data.frame() %>% 
+  hilldiv(., q = 1, tree=class_tree) %>% 
+  t() %>% 
+  as.data.frame() %>% 
+  rownames_to_column(var="sample") %>% 
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>% 
+  filter(!is.na(Elevation))
+
+class_diversity %>% 
+  ggplot(aes(x=Elevation,y=q1,group=Elevation, color=Elevation, fill=Elevation)) +
+    geom_jitter(alpha=0.8, width=0.3) +
+    geom_boxplot(outlier.shape = NA) + 
+    facet_wrap(. ~ Transect, scales = "free", ncol=4) +
+    theme_minimal()
+
+
+```
+
+```{r diet_order_diversity, comment="", echo=FALSE, message=FALSE, warning=FALSE}
+#Order tree
+order_tree <- diet2 %>% 
+  filter(str_detect(Taxonomy, "^k__[^;]*;p__[^;]*;c__[^;]*;o__[^;]*$")) %>% 
+  select(Taxonomy) %>% 
+  separate(Taxonomy, c("domain","phylum","class","order"),  sep =";") %>%
+  mutate(across(c(domain, phylum, class, order), as.factor)) %>% 
+  as.phylo(~domain/phylum/class/order, data = ., collapse=FALSE) %>% 
+  compute.brlen(., method = "path")
+
+order_diversity <- diet2 %>% 
+  filter(str_detect(Taxonomy, "^k__[^;]*;p__[^;]*;c__[^;]*;o__[^;]*$")) %>% 
+  mutate(Taxonomy = str_extract(Taxonomy, "o__[^;]+$")) %>% 
+  column_to_rownames(var = "Taxonomy") %>% 
+  tss() %>% 
+  as.data.frame() %>% 
+  hilldiv(., q = 1, tree=order_tree) %>% 
+  t() %>% 
+  as.data.frame() %>% 
+  rownames_to_column(var = "sample") %>% 
+  left_join(sample_metadata, by = join_by(sample == EHI_number)) %>% 
+  filter(!is.na(Elevation))
+
+order_diversity %>% 
+  ggplot(aes(x=Elevation,y=q1,group=Elevation, color=Elevation, fill=Elevation)) +
+    geom_jitter(alpha=0.8, width=0.3) +
+    geom_boxplot(outlier.shape = NA) + 
+    facet_wrap(. ~ Transect, scales = "free", ncol=4) +
+    theme_minimal()
+
+```
+
+```{r diet_order_composition, comment="", echo=FALSE, message=FALSE, warning=FALSE}
+diet2 %>% 
+  filter(str_detect(Taxonomy, "^k__[^;]*;p__[^;]*;c__[^;]*;o__[^;]*$")) %>% 
+  mutate_at(vars(-Taxonomy),~./sum(.)) %>%
+  separate(Taxonomy, c("domain","phylum","class","order"),  sep =";") %>%
+  pivot_longer(-c(domain,phylum,class,order),names_to = "sample",values_to = "count") %>% 
+  left_join(sample_metadata,by = join_by(sample == EHI_number)) %>% 
+  filter(!is.na(Elevation)) %>% 
+  ggplot(aes(x=sample,y=count, fill=phylum, group=phylum)) + 
+    geom_bar(stat="identity", colour="white", linewidth=0.1) + 
+    #scale_fill_manual(values=c("#e376e1","#40a832","#e36495","#d9d2bf","#32ed96","#98bf82","#e38a64","#e36464")) +
+    facet_wrap(. ~ Transect, scales = "free", ncol=4) +
+    guides(fill = guide_legend(ncol = 1)) +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) 
+```
+
+
